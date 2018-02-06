@@ -1,5 +1,7 @@
 # Chad A. Woitas
-# CMPT 317 A1
+# #11137533
+# NSID: CAW724
+# CMPT 317
 # Michael Horcsh
 # Due Date February 9
 # Partner: Brandon B.
@@ -16,7 +18,8 @@
 # package location(s) = n
 # vehicleHasPackage
 
-# successor function must
+# successor function must move vehicle toward package
+# or toward location
 
 # ---------------------------------
 
@@ -31,19 +34,19 @@ nx.draw(city, font_size=1)
 plt.show()
 
 
-#TODO: Implement
+# TODO: Implement
 class Search:
     def search(self):
         return True
-    def successor(self):
-        return True
 
-#TODO: Implement
+
+# TODO: Implement
 class SearchNodes:
     def searchNodes(self):
         return True
 
-#TODO: Implement
+
+# TODO: Implement
 class StateQueue:
     def initialize(self):
         return True
@@ -54,13 +57,16 @@ class StateQueue:
     def add(self):
         return True
 
-#TODO: Implement
+
+# TODO: Implement
 class ProblemState:
     def ProblemState(self):
         return True
 
-#TODO: Implement
+
+# TODO: Implement
 class Problem:
+
     def initialize(self):
         return True
 
