@@ -32,11 +32,11 @@ import matplotlib.pyplot as plt
 
 class Package:
 
-    def __init__(self, source, destination):
-        # global source, destination, location
+    def __init__(self, source, destination, pid):
         self.source = source
         self.destination = destination
         self.location = source
+        self.id = pid
 
 
 class Vehicle:
@@ -46,7 +46,7 @@ class Vehicle:
         self.packageLimit = 1
         self.cargo = []
 
-    def addPackage(self, package):
+    def pickupPackage(self, package):
         if self.cargo.count() < self.packageLimit:
             self.cargo.append(package)
             package.delete
@@ -95,29 +95,22 @@ class ProblemState:
 # TODO: Implement
 class Problem:
 
-    G = nx.grid_graph([5, 2])
+    G = nx.grid_graph([10])
 
+    for i in range(G.number_of_nodes()):
+        G.add_node(i, name=i)
 
-    G.add_node("Garage")
-    G.add_node("Location1")
-    G.add_node("Location2")
-    G.add_edge("Garage", "Location1")
-    G.add_edge("Location1", "Location2")
+    print(G.node[2])
 
-    Truck = Vehicle(G["Garage"])
-    P1 = Package(G["Location1"], G["Location2"])
+    Truck = Vehicle(G.node[0])
+    P1 = Package(G.node[rng.randint(1, 9)], G.node[rng.randint(1, 9)])
+    print("Truck", Truck.location)
+    print("PS", P1.source, P1.destination, P1.location)
 
-    print(Truck.location, Truck.cargo)
-    print(P1.location, P1.source, P1.destination)
+    # plt.subplot()
+    # nx.draw(G, font_size=1)
 
-    map = nx.dfs_preorder_nodes(G, "Garage")
-
-    print(list(map))
-
-    plt.subplot()
-    nx.draw(G, font_size=1)
-
-    plt.show()
+    # plt.show()
 
     def initialize(self):
         return True
