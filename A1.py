@@ -87,33 +87,25 @@ class StateQueue:
 
 # TODO: Implement
 class ProblemState:
-
+    # Next do this
     def ProblemState(self):
         return True
 
 
-# TODO: Implement
 class Problem:
 
-    G = nx.grid_graph([10])
+    def __init__(self):
+        global truck, p1
+        G = nx.grid_graph([10])
 
-    for i in range(G.number_of_nodes()):
-        G.add_node(i, name=i)
+        for i in range(G.number_of_nodes()):
+            G.add_node(i, node=i)
 
-    print(G.node[2])
+        truck = Vehicle(G.node[0])
+        p1 = Package(G.node[rng.randint(1, 9)], G.node[rng.randint(1, 9)],1)
+        print("Truck Starting at", truck.location)
+        print("Package 1 Starting", p1.source, "Destination", p1.destination, "Current Location", p1.location)
 
-    Truck = Vehicle(G.node[0])
-    P1 = Package(G.node[rng.randint(1, 9)], G.node[rng.randint(1, 9)])
-    print("Truck", Truck.location)
-    print("PS", P1.source, P1.destination, P1.location)
-
-    # plt.subplot()
-    # nx.draw(G, font_size=1)
-
-    # plt.show()
-
-    def initialize(self):
-        return True
 
 # packages at destination
     def isGoal(self):
@@ -123,4 +115,9 @@ class Problem:
         return True
 
 
+# Begin Algorithm
 
+problem = Problem()
+
+
+print(p1)
