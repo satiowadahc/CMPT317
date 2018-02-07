@@ -4,34 +4,61 @@
 # CMPT 317
 # Michael Horcsh
 # Due Date February 9
-# Partner: Brandon B.
+# Partner: Brandon Bachynski.
 
 # Plan
 # --------------------------------
 # startSpace
-# All Vehicles start at (0,0,0) y=3
+# All Vehicles start at 0 (Garage)
 # Packages are randomly distributed
 # Delivery spots are random
 
-# state
-# vehicle location(s) = m
-# package location(s) = n
-# vehicleHasPackage
-
-# successor function must move vehicle toward package
-# or toward location
+# Vehicles and Packages are separate objects from nodes
+# Graph traversal will check with objects
 
 # ---------------------------------
 
 import networkx as nx
+import random as rng
 import matplotlib.pyplot as plt
 
-city = nx.grid_graph(dim=[10, 10])
+# city = nx.grid_graph(dim=[10, 10])
 
-plt.subplot()
-nx.draw(city, font_size=1)
+# plt.subplot()
+# nx.draw(city, font_size=1)
 
-plt.show()
+# plt.show()
+
+
+class Package:
+
+    def __init__(self, source, destination):
+        # global source, destination, location
+        self.source = source
+        self.destination = destination
+        self.location = source
+
+
+class Vehicle:
+
+    def __init__(self, g):
+        self.location = g
+        self.packageLimit = 1
+        self.cargo = []
+
+    def addPackage(self, package):
+        if self.cargo.count() < self.packageLimit:
+            self.cargo.append(package)
+            package.delete
+
+    def moveVehicle(self, g):
+        self.location = g
+
+    def deliverPackage(self, currNode):
+        for i in self.cargo:
+            if self.cargo[i].destination == currNode:
+                self.cargo[i].location = currNode
+                self.cargo[i].pop
 
 
 # TODO: Implement
@@ -60,6 +87,7 @@ class StateQueue:
 
 # TODO: Implement
 class ProblemState:
+
     def ProblemState(self):
         return True
 
@@ -67,11 +95,39 @@ class ProblemState:
 # TODO: Implement
 class Problem:
 
+    G = nx.grid_graph([5, 2])
+
+
+    G.add_node("Garage")
+    G.add_node("Location1")
+    G.add_node("Location2")
+    G.add_edge("Garage", "Location1")
+    G.add_edge("Location1", "Location2")
+
+    Truck = Vehicle(G["Garage"])
+    P1 = Package(G["Location1"], G["Location2"])
+
+    print(Truck.location, Truck.cargo)
+    print(P1.location, P1.source, P1.destination)
+
+    map = nx.dfs_preorder_nodes(G, "Garage")
+
+    print(list(map))
+
+    plt.subplot()
+    nx.draw(G, font_size=1)
+
+    plt.show()
+
     def initialize(self):
         return True
 
+# packages at destination
     def isGoal(self):
         return True
 
     def successors(self):
         return True
+
+
+
