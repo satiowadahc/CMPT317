@@ -88,8 +88,18 @@ class StateQueue:
 # TODO: Implement
 class ProblemState:
     # Next do this
-    def ProblemState(self):
-        return True
+
+    def __init__(self, vehicles, packages):
+        self.vehicles = vehicles
+        self.packages = packages
+
+    def displayState(self):
+        print("Trucks:")
+        print("-------")
+        print(self.vehicles.location, self.vehicles.cargo)
+        print("Packages:")
+        print("-------")
+        print(self.packages.location, self.packages.source, self.packages.destination)
 
 
 class Problem:
@@ -102,7 +112,7 @@ class Problem:
             G.add_node(i, node=i)
 
         truck = Vehicle(G.node[0])
-        p1 = Package(G.node[rng.randint(1, 9)], G.node[rng.randint(1, 9)],1)
+        p1 = Package(G.node[rng.randint(1, 9)], G.node[rng.randint(1, 9)], 1)
         print("Truck Starting at", truck.location)
         print("Package 1 Starting", p1.source, "Destination", p1.destination, "Current Location", p1.location)
 
@@ -119,5 +129,6 @@ class Problem:
 
 problem = Problem()
 
+problemState = ProblemState(truck, p1)
 
-print(p1)
+problemState.displayState()
