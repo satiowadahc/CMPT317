@@ -24,8 +24,8 @@ import matplotlib.pyplot as plt
 
 
 # PARAMETERS ----------------------------------
-trucksNum = 1
-packsNum = 1
+trucksNum = 3
+packsNum = 8
 # gridy = 1
 gridx = 10
 # PARAMETERS ----------------------------------
@@ -41,12 +41,13 @@ class Package:
 
 class Vehicle:
     location = nx.Graph()
+    adjacent = nx.Graph()
     cargo = []
     vid = 0
 
-    def __init__(self, g, vid):
-        global location, cargo
+    def __init__(self, g, adj, vid):
         self.location = g
+        self.adjacent = adj
         self.packageLimit = 1
         self.cargo = []
         self.vid = vid
@@ -57,7 +58,14 @@ class Vehicle:
             package.delete
 
     def moveVehicle(self, g):
-        self.location = g
+        for i in self.adjacent:
+            current = True
+            if G.node[i] == g:
+                self.location = g
+                self.adjacent = G[i]
+                current = False
+        if current:
+            print("Cant Move There")
 
     def deliverPackage(self, currNode):
         for i in self.cargo:
@@ -94,7 +102,6 @@ class StateQueue:
 
 
 class ProblemState:
-    # Next do this
     vehicles = []
     packages = []
 
@@ -103,6 +110,7 @@ class ProblemState:
         self.packages = newpacks
 
     # Percentage of Packages at goals
+    # Returns Percentage
     def packageEvaluate(self):
         test = 0
         for i in range(len(self.packages)):
@@ -112,6 +120,7 @@ class ProblemState:
         return test*100/len(self.packages)
 
     # Percentage of Trucks in Garage
+    # Returns Percentage
     def truckEvaluate(self):
         test = 0
         g = nx.grid_graph([1])
@@ -120,11 +129,9 @@ class ProblemState:
             current = self.vehicles
             if current[i].location == g.node[0]:
                 test += 1
-        print(g.node)
-        print(current[i].location)
         return test*100/len(self.vehicles)
 
-
+    # Displays Current State to console
     def displayState(self):
         print("Trucks:")
         print("-------")
@@ -148,29 +155,32 @@ class ProblemState:
 class Problem:
     trucks = []
     packs = []
+    G = nx.Graph()
 
     def __init__(self):
-        global trucks, packs
+        global trucks, packs, G
         trucks = []
         packs = []
         # Graph Creation
-        G = nx.grid_graph([gridx])
-        for i in range(G.number_of_nodes()):
-            G.add_node(i, node=i)
+        self.G = nx.grid_graph([gridx])
+        for i in range(self.G.number_of_nodes()):
+            self.G.add_node(i, node=i)
 
         # Trucks Creation
         for i in range(trucksNum):
-            newTruck = Vehicle(G.node[0], i)
+            newTruck = Vehicle(self.G.node[0], self.G[0], i)
             trucks.append(newTruck)
 
         # Packages Creation
         for i in range(packsNum):
-            x = rng.randint(1, G.number_of_nodes()-1)
-            y = rng.randint(1, G.number_of_nodes()-1)
+            x = rng.randint(1, self.G.number_of_nodes()-1)
+            y = rng.randint(1, self.G.number_of_nodes()-1)
             while x == y:
-                y = rng.randint(1, G.number_of_nodes())
-            newPack = Package(G.node[x], G.node[y], 1)
+                y = rng.randint(1, self.G.number_of_nodes()-1)
+            newPack = Package(self.G.node[x], self.G.node[y], 1)
             packs.append(newPack)
+
+        G = self.G
 
     # packages at destination
     def isGoal(self):
@@ -187,11 +197,23 @@ class Problem:
         else:
             return False
 
+    # returns next (Vehicle Id, possible nodes)
     def successors(self):
-        return True
+        successArray = []
+        current = []
+        for i in range(len(trucks)):
+            current += trucks[i].adjacent
+            nextt = [trucks[i].vid]
+            for j in range(len(current)):
+                nextt.append(current[j])
+            successArray.append(nextt)
+            current=[]
+        print("successors:")
+        print("-----------")
+        print(successArray)
+        return successArray
 
-
-# Begin Algorithm
+# Begin Main Execution
 
 # initialize problem
 problem = Problem()
@@ -199,9 +221,20 @@ problem = Problem()
 # Test initial problem state
 problemState = ProblemState(trucks, packs)
 
-problemState.displayState()
+# problemState.displayState()
 
 print(problemState.truckEvaluate(), problemState.packageEvaluate())
 
 # Test percentage towards end
 problem.isGoal()
+
+problem.successors()
+trucks[1].moveVehicle(problem.G.node[1])
+problem.successors()
+trucks[1].moveVehicle(problem.G.node[2])
+problem.successors()
+trucks[1].moveVehicle(problem.G.node[1])
+problem.successors()
+trucks[1].moveVehicle(problem.G.node[2])
+problem.successors()
+
