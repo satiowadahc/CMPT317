@@ -80,14 +80,17 @@ class SearchNodes:
 
 # TODO: Implement
 class StateQueue:
-    def initialize(self):
-        return True
+    problemqueue = []
+
+    def __init__(self, newV, newP):
+        self.problemqueue.append(problemState(newV, newP))
+
 
     def remove(self):
         return True
 
-    def add(self):
-        return True
+    def add(self, newV, newP):
+        self.problemqueue.append(problemState(newV, newP))
 
 
 class ProblemState:
@@ -98,6 +101,29 @@ class ProblemState:
     def __init__(self, newvehicles, newpacks):
         self.vehicles = newvehicles
         self.packages = newpacks
+
+    # Percentage of Packages at goals
+    def packageEvaluate(self):
+        test = 0
+        for i in range(len(self.packages)):
+            current = self.packages
+            if current[i].location == current[i].destination:
+                test += 1
+        return test*100/len(self.packages)
+
+    # Percentage of Trucks in Garage
+    def truckEvaluate(self):
+        test = 0
+        g = nx.grid_graph([1])
+        g.add_node(0, node=0)
+        for i in range(len(self.vehicles)):
+            current = self.vehicles
+            if current[i].location == g.node[0]:
+                test += 1
+        print(g.node)
+        print(current[i].location)
+        return test*100/len(self.vehicles)
+
 
     def displayState(self):
         print("Trucks:")
@@ -134,7 +160,7 @@ class Problem:
 
         # Trucks Creation
         for i in range(trucksNum):
-            newTruck = Vehicle(G.node[1], i)
+            newTruck = Vehicle(G.node[0], i)
             trucks.append(newTruck)
 
         # Packages Creation
@@ -146,7 +172,7 @@ class Problem:
             newPack = Package(G.node[x], G.node[y], 1)
             packs.append(newPack)
 
-# packages at destination
+    # packages at destination
     def isGoal(self):
         test = 0
 
@@ -167,10 +193,15 @@ class Problem:
 
 # Begin Algorithm
 
+# initialize problem
 problem = Problem()
 
+# Test initial problem state
 problemState = ProblemState(trucks, packs)
 
 problemState.displayState()
 
+print(problemState.truckEvaluate(), problemState.packageEvaluate())
+
+# Test percentage towards end
 problem.isGoal()
