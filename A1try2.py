@@ -1,5 +1,6 @@
 import random as rng
 import copy as cp
+import queue as q
 
 number_of_trucks = 1
 number_of_packs = 1
@@ -24,19 +25,17 @@ class Truck:
     def __init__(self, location, capacity):
         self.location = location
         self.capacity = capacity
-        self.packages = [None] * capacity
+        self.packages = []*capacity
 
     def moveTruckRight(self):
         self.location += 1
-        # TODO: Self.location has none type?
-        # for item in self.packages:
-        #     item.location = self.location
+        for item in self.packages:
+            item.location = self.location
 
     def moveTruckLeft(self):
         self.location -= 1
-        # TODO: Self.location has none type
-        # for item in self.packages:
-        #     item.location = self.location
+        for item in self.packages:
+            item.location = self.location
 
     def pickupPackage(self, package):
         if len(self.packages) < self.capacity:
@@ -47,42 +46,39 @@ class Truck:
             if package.destination == self.location:
                 self.packages.remove(package)
 
-class Search:
 
-  def search(self,problem,initialState,queue):
-     queue.initialize()
-     queue.add(initialState)
-     while not queue.empty():
-        here = queue.remove()
-        if problem.isGoal(here):
-           return here #+ some stats about run time costs
+class Search:
+    def search(self, problem, initialState, queue):
+        queue.initialize()
+        queue.add(initialState)
+        while not queue.empty():
+            here = queue.remove()
+            if problem.isGoal(here):
+                return here #+ some stats about run time costs
         else:
-           next = problem.successors(here)
-           for s in next:
-               queue.add(s)
-     return "FAILED SEARCH + some stats about run time costs"
-#
+            next = problem.successors(here)
+            for s in next:
+                queue.add(s)
+        return "FAILED SEARCH + some stats about run time costs"
+
+
 # Class SearchNodes()
 #    - needs to store problem state information as well as search information
-#
 class StateQueue:
 
     queue = q.Queue()
 
-
-    def add(self,state):
+    def add(self, state):
         self.queue.put(state)
 
     def remove(self):
         return self.queue.get()
 
-    def compare(self,state1,state2):
+    def compare(self, state1, state2):
         if state1.cost < state2.cost:
             return state1.cost
         else:
             return state2.cost
-
-
 
 
 class ProblemState:
@@ -90,7 +86,7 @@ class ProblemState:
         self.trucks = trucks
         self.packages = packages
 
-    #testing only
+    # testing only
     def display(self):
         print("P state -----")
         print("trucks")
@@ -144,8 +140,6 @@ class Problem:
         newPacksLeft = []
         # newPacksRight = []
 
-        # TODO: Issue trucks are changing original problem state
-
         # Move Right if Possible Else Move Left
         currentTruck = cp.copy(ps.trucks[0])
         if currentTruck.location == grid_x:
@@ -171,7 +165,6 @@ class Problem:
         newProblems.append(ProblemState(newTruckLeft, newPacksLeft))
         newProblems.append(ProblemState(newTruckRight, newPacksLeft))
 
-        newProblems[0].display()
         return newProblems
 
 
@@ -185,5 +178,11 @@ ps = problem.initProblemState()
 # Initialize StateQueue
 
 # Testing Below
-ps.display()
 test = problem.successors(ps)
+qu = StateQueue()
+
+qu.add(ps)
+print(test)
+for item in test:
+    qu.add(item)
+print(qu.queue.qsize())
