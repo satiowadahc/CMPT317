@@ -67,20 +67,19 @@ class Truck:
 #    function add(state)
 #    -- needs to be able to compare states!
 #    -- store heuristic information in the state itself!
-#
-# class ProblemState:
-#     def __init__(self,trucks,packages):
 
-#    - needs to store the state for the problem
-#    - can also store a reference to the state from which it was generated
-#    - this will help you construct a plan from the chain of states
-#
+
+class ProblemState:
+     def __init__(self,trucks,packages):
+        self.trucks = trucks
+        self.packages = packages
 
 
 class Problem:
-    trucks= []
-    packages= []
-    grid= []
+    trucks = []
+    packages = []
+    grid = []
+
     def __init__(self):
         for i in range(number_of_trucks):
             self.trucks.append(Truck(0,truck_capacity))
@@ -88,8 +87,11 @@ class Problem:
             x = rng.randint(1, grid_x-1)
             y = rng.randint(1, grid_x-1)
             while x == y:
-                y = rng.randint(1, self.G.number_of_nodes()-1)
+                y = rng.randint(1, grid_x-1)
             self.packages.append(Package(x, x, y))
+
+    def initProblemState(self):
+        return ProblemState(self.trucks, self.packages)
 
     # True until proven False
     def isGoal(self, ps):
@@ -105,13 +107,38 @@ class Problem:
                 self.Ttest = True
             else:
                 return False
+        return self.Ptest and self.Ttest
 
 
     def successors(self, ps):
-        for i in ps.trucks:
-            print()
+        newProblems = []
+        newTrucks = []
+        newPacks = []
 
+        for i in ps.trucks:
+            if i.location == 0:
+                newTrucks += i.moveRight
+            else:
+                newTrucks += i.moveLeft
+            for j in ps.trucks:
+                if j.location == 0:
+                    newTrucks += j.moveRight
+                elif j.location == grid_x:
+                    newTrucks += j.moveLeft
+                else:
+                    newTrucks += j.moveRight
+            # Add Packages from trucks
+            # TODO: Add packages
+
+        newProblems += ProblemState(newTrucks, newPacks)
+        return newProblems
 
 # Begin Execution
 
 problem = Problem()
+
+ps = problem.initProblemState()
+
+ps.packages
+
+
