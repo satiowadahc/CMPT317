@@ -20,15 +20,15 @@
 
 import networkx as nx
 import random as rng
-import matplotlib.pyplot as plt
 
 
 # PARAMETERS ----------------------------------
-trucksNum = 3
-packsNum = 8
+trucksNum = 1
+packsNum = 1
 # gridy = 1
 gridx = 10
 # PARAMETERS ----------------------------------
+
 
 class Package:
 
@@ -37,6 +37,9 @@ class Package:
         self.destination = destination
         self.location = source
         self.id = pid
+
+    def movePackage(self,g):
+        self.location = g
 
 
 class Vehicle:
@@ -53,18 +56,19 @@ class Vehicle:
         self.vid = vid
 
     def pickupPackage(self, package):
-        if self.cargo.count() < self.packageLimit:
+        if len(self.cargo) < self.packageLimit:
             self.cargo.append(package)
-            package.delete
 
     def moveVehicle(self, g):
+        current = False
         for i in self.adjacent:
-            current = True
             if G.node[i] == g:
                 self.location = g
                 self.adjacent = G[i]
-                current = False
-        if current:
+                for j in self.cargo:
+                    j.movePackage(g)
+                current = True
+        if not current:
             print("Cant Move There")
 
     def deliverPackage(self, currNode):
@@ -76,38 +80,70 @@ class Vehicle:
 
 # TODO: Implement
 class Search:
+    node = nx.Graph()
+    # 1 for forward
+    # -1 for backward
+    travelDirection = 1
+
+    def __init__(self, ps):
+
+        if(ps.packageEvaluate() == 100.0) and (ps.truckEvaluate() == 100.0):
+            print("Complete")
+        else:
+            print("Packages Left", 100.0-ps.packageEvaluate(),
+                  "Trucks Left", 100.0-ps.truckEvaluate())
+            self.search()
+
     def search(self):
-        return True
+        for i in range(len(trucks)):
+
+            # test for package pick up
+            for j in range(len(packs)):
+                if (trucks[i].location == packs[j].location) and\
+                        (packs[j].location != packs[j].destination):
+                    trucks[i].pickupPackage(packs[j])
+                    print("Truck", i, "Has picked up package", j)
+
+            # test for current packages
+            if len(trucks[i].cargo) > 0:
+                left = trucks[i].adjacent[0]
+                right = trucks[i].adjacent[1]
+                currentDestination = trucks[i].cargo[0].destination
+                if trucks[i].location > currentDestination:
+                    trucks[i].moveVehicle(left)
+                else:
+                    trucks[i].moveVehicle(right)
+            # move towards package destination
+
+            # move to adjency
 
 
-# TODO: Implement
-class SearchNodes:
-    def searchNodes(self):
-        return True
+# # TODO: Implement
+# class SearchNodes:
+#     def searchNodes(self):
+#         return True
 
 
-# TODO: Implement
 class StateQueue:
-    problemqueue = []
+    problemQueue = []
 
-    def __init__(self, newV, newP):
-        self.problemqueue.append(problemState(newV, newP))
-
+    def __init__(self,ps):
+        self.problemQueue.append(ps)
 
     def remove(self):
-        return True
+        return self.problemQueue.pop()
 
-    def add(self, newV, newP):
-        self.problemqueue.append(problemState(newV, newP))
+    def add(self, ps):
+        self.problemQueue.append(ps)
 
 
 class ProblemState:
     vehicles = []
     packages = []
 
-    def __init__(self, newvehicles, newpacks):
-        self.vehicles = newvehicles
-        self.packages = newpacks
+    def __init__(self, newVehicles, newPacks):
+        self.vehicles = newVehicles
+        self.packages = newPacks
 
     # Percentage of Packages at goals
     # Returns Percentage
@@ -183,7 +219,8 @@ class Problem:
         G = self.G
 
     # packages at destination
-    def isGoal(self):
+    @staticmethod
+    def isGoal():
         test = 0
 
         for i in range(len(packs)):
@@ -198,25 +235,27 @@ class Problem:
             return False
 
     # returns next (Vehicle Id, possible nodes)
-    def successors(self):
+    @staticmethod
+    def successors():
         successArray = []
         current = []
         for i in range(len(trucks)):
             current += trucks[i].adjacent
-            nextt = [trucks[i].vid]
+            nextT = [trucks[i].vid]
             for j in range(len(current)):
-                nextt.append(current[j])
-            successArray.append(nextt)
-            current=[]
+                nextT.append(current[j])
+            successArray.append(nextT)
+            current = []
         print("successors:")
         print("-----------")
         print(successArray)
         return successArray
 
-# Begin Main Execution
 
+# Begin Main Execution
 # initialize problem
 problem = Problem()
+
 
 # Test initial problem state
 problemState = ProblemState(trucks, packs)
@@ -226,15 +265,21 @@ problemState = ProblemState(trucks, packs)
 print(problemState.truckEvaluate(), problemState.packageEvaluate())
 
 # Test percentage towards end
-problem.isGoal()
+# problem.isGoal()
 
-problem.successors()
-trucks[1].moveVehicle(problem.G.node[1])
-problem.successors()
-trucks[1].moveVehicle(problem.G.node[2])
-problem.successors()
-trucks[1].moveVehicle(problem.G.node[1])
-problem.successors()
-trucks[1].moveVehicle(problem.G.node[2])
-problem.successors()
+# test Truck moving
+# problem.successors()
+# trucks[0].moveVehicle(problem.G.node[1])
+# problem.successors()
+# packs[0].location = G.node[1]
+#
+# trucks[0].pickupPackage(packs[0])
+#
+# print(trucks[0].cargo[0].location)
+# trucks[0].moveVehicle(problem.G.node[0])
+# problem.successors()
+# print(trucks[0].cargo[0].location)
 
+problemState.displayState()
+Search(problemState)
+problemState.displayState()
