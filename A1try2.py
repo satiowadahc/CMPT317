@@ -147,7 +147,7 @@ class Problem:
             # Check to Pick up package
             if currentTruck.location == oldPacksRight[0].location:
                 currentTruck.pickupPackage(oldPacksRight[0])
-                print("Right Truck moved me")
+                print("Right Truck moved me")  # Testing ---------------------------
             newTruckRight.append(currentTruck)
         else:
             currentTruck.moveTruckRight()
@@ -174,7 +174,7 @@ class Problem:
                 print("Left Truck moved me")
             newTruckLeft.append(currentTruck)
 
-        # TODO: issue: packages aren't updated in problem state Maybe?
+        # TODO: issue: packages need to be delivered
 
         newProblems.append(ProblemState(newTruckLeft, oldPacksLeft))
         newProblems.append(ProblemState(newTruckRight, oldPacksRight))
@@ -191,12 +191,28 @@ ps = problem.initProblemState()
 
 # Initialize StateQueue
 
+ps.display()
 # Testing Below
 test = problem.successors(ps)
 
 for i in range(grid_x):
-    print("Step", i)
+    print("Step", i,i,i,i,i,i)
+    print("Moving right")
+    test[1].display()
+    print("Moving left")
     test[0].display()
     test = problem.successors(test[1])
 
+print()
+print()
+print("Reverse")
+print()
+print()
 
+for i in range(grid_x):
+    print("Step", i, i, i, i, i, i)
+    print("Moving right")
+    test[1].display()
+    print("Moving left")
+    test[0].display()
+    test = problem.successors(test[0])
