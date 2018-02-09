@@ -141,7 +141,6 @@ class Problem:
 
         # Move Right if Possible Else Move Left
         currentTruck = cp.deepcopy(ps.trucks[0])
-        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Forwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == grid_x:
@@ -165,7 +164,7 @@ class Problem:
             # Check to drop off Packages
             if len(currentTruck.packages) > 0 and\
                     currentTruck.location == currentTruck.packages[0].destination:
-                        currentTruck.deliverPackage(currentTruck.package[0])
+                        currentTruck.deliverPackage(currentTruck.packages[0])
             # End Package
             newTruckRight.append(currentTruck)
 
