@@ -88,14 +88,14 @@ class ProblemState:
 
     # testing only
     def display(self):
-        print("P state -----")
+        print("Problem state -----")
         print("trucks")
         for i in range(len(self.trucks)):
-            print(self.trucks[i].location)
+            print("Truck at", self.trucks[i].location)
         print("packages")
         for i in range(len(self.packages)):
-            print(self.packages[i].location)
-        print("-----")
+            print("Package at", self.packages[i].location)
+        print("-------------------")
 
 
 class Problem:
@@ -137,33 +137,47 @@ class Problem:
         newProblems = []
         newTruckRight = []
         newTruckLeft = []
-        newPacksLeft = []
-        # newPacksRight = []
+        oldPacksRight = cp.copy(ps.packages)
+        oldPacksLeft = cp.copy(ps.packages)
 
         # Move Right if Possible Else Move Left
         currentTruck = cp.copy(ps.trucks[0])
         if currentTruck.location == grid_x:
             currentTruck.moveTruckLeft()
+            # Check to Pick up package
+            if currentTruck.location == oldPacksRight[0].location:
+                currentTruck.pickupPackage(oldPacksRight[0])
+                print("Right Truck moved me")
             newTruckRight.append(currentTruck)
         else:
             currentTruck.moveTruckRight()
+            # Check to Pick up package
+            if currentTruck.location == oldPacksRight[0].location:
+                currentTruck.pickupPackage(oldPacksRight[0])
+                # print("Right Truck moved me") # --- testing --------------------
             newTruckRight.append(currentTruck)
 
         # Move Left if possible else move right
         currentTruck = cp.copy(ps.trucks[0])
         if currentTruck.location == 0:
             currentTruck.moveTruckRight()
+            # Check to Pick up package
+            if currentTruck.location == oldPacksLeft[0].location:
+                currentTruck.pickupPackage(oldPacksLeft[0])
+                # print("Left Truck moved me") # --- testing --------------------
             newTruckLeft.append(currentTruck)
         else:
             currentTruck.moveTruckLeft()
+            # Check to Pick up package
+            if currentTruck.location == oldPacksLeft[0].location:
+                currentTruck.pickupPackage(oldPacksLeft[0])
+                print("Left Truck moved me")
             newTruckLeft.append(currentTruck)
 
         # TODO: issue: packages aren't updated in problem state Maybe?
-        for j in range(len(ps.packages)):
-            newPacksLeft.append(ps.packages[j])
 
-        newProblems.append(ProblemState(newTruckLeft, newPacksLeft))
-        newProblems.append(ProblemState(newTruckRight, newPacksLeft))
+        newProblems.append(ProblemState(newTruckLeft, oldPacksLeft))
+        newProblems.append(ProblemState(newTruckRight, oldPacksRight))
 
         return newProblems
 
@@ -179,10 +193,10 @@ ps = problem.initProblemState()
 
 # Testing Below
 test = problem.successors(ps)
-qu = StateQueue()
 
-qu.add(ps)
-print(test)
-for item in test:
-    qu.add(item)
-print(qu.queue.qsize())
+for i in range(grid_x):
+    print("Step", i)
+    test[0].display()
+    test = problem.successors(test[1])
+
+
