@@ -11,10 +11,11 @@ grid_y = 1
 
 class Package:
 
-    def __init__(self, location, source, destination):
+    def __init__(self, location, source, destination, id):
         self.location = location
         self.source = source
         self.destination = destination
+        self.id = id
 
 
 class Truck:
@@ -82,6 +83,7 @@ class StateQueue:
 
 
 class ProblemState:
+
     def __init__(self, trucks, packages):
         self.trucks = trucks
         self.packages = packages
@@ -89,12 +91,10 @@ class ProblemState:
     # testing only
     def display(self):
         print("Problem state -----")
-        print("trucks")
         for i in range(len(self.trucks)):
-            print("Truck at", self.trucks[i].location)
-        print("packages")
+            print("Problem State Truck at", self.trucks[i].location)
         for i in range(len(self.packages)):
-            print("Package at", self.packages[i].location)
+            print("Problem State Package at", self.packages[i].location)
         print("-------------------")
 
 
@@ -111,7 +111,7 @@ class Problem:
             y = rng.randint(1, grid_x-1)
             while x == y:
                 y = rng.randint(1, grid_x-1)
-            self.packages.append(Package(x, x, y))
+            self.packages.append(Package(x, x, y, i))
 
     def initProblemState(self):
         return ProblemState(self.trucks, self.packages)
@@ -137,47 +137,71 @@ class Problem:
         newProblems = []
         newTruckRight = []
         newTruckLeft = []
-        oldPacksRight = cp.copy(ps.packages)
-        oldPacksLeft = cp.copy(ps.packages)
+        packagesRight = cp.deepcopy(ps.packages)
+        packagesLeft = cp.deepcopy(ps.packages)
 
         # Move Right if Possible Else Move Left
-        currentTruck = cp.copy(ps.trucks[0])
+        currentTruck = cp.deepcopy(ps.trucks[0])
+        print(currentTruck.packages)
+        if len(currentTruck.packages) != 0:
+            print("Forwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == grid_x:
             currentTruck.moveTruckLeft()
             # Check to Pick up package
-            if currentTruck.location == oldPacksRight[0].location:
-                currentTruck.pickupPackage(oldPacksRight[0])
-                print("Right Truck moved me")  # Testing ---------------------------
+            if currentTruck.capacity > len(currentTruck.packages) and\
+                currentTruck.location == packagesRight[0].location:
+                    currentTruck.pickupPackage(packagesRight[0])
+                    print("pickme")
+
+            # End Package
             newTruckRight.append(currentTruck)
         else:
             currentTruck.moveTruckRight()
             # Check to Pick up package
-            if currentTruck.location == oldPacksRight[0].location:
-                currentTruck.pickupPackage(oldPacksRight[0])
-                # print("Right Truck moved me") # --- testing --------------------
+            if currentTruck.capacity > len(currentTruck.packages) and\
+                currentTruck.location == packagesRight[0].location:
+                    currentTruck.pickupPackage(packagesRight[0])
+                    print("pickme")
+            # End Package
             newTruckRight.append(currentTruck)
 
+        for item in currentTruck.packages:
+            for pack in packagesRight:
+                if item.id == pack.id:
+                    pack.location = item.location
+
         # Move Left if possible else move right
-        currentTruck = cp.copy(ps.trucks[0])
+        currentTruck = cp.deepcopy(ps.trucks[0])
+        print(currentTruck.packages)
+        if len(currentTruck.packages) != 0:
+            print("Backwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == 0:
             currentTruck.moveTruckRight()
             # Check to Pick up package
-            if currentTruck.location == oldPacksLeft[0].location:
-                currentTruck.pickupPackage(oldPacksLeft[0])
-                # print("Left Truck moved me") # --- testing --------------------
+            if currentTruck.capacity > len(currentTruck.packages) and\
+                currentTruck.location == packagesLeft[0].location:
+                    currentTruck.pickupPackage(packagesLeft[0])
+                    print("pickme")
+            # End Package
             newTruckLeft.append(currentTruck)
         else:
             currentTruck.moveTruckLeft()
             # Check to Pick up package
-            if currentTruck.location == oldPacksLeft[0].location:
-                currentTruck.pickupPackage(oldPacksLeft[0])
-                print("Left Truck moved me")
+            if currentTruck.capacity > len(currentTruck.packages) and\
+                currentTruck.location == packagesLeft[0].location:
+                    currentTruck.pickupPackage(packagesLeft[0])
+                    print("pickme")
+            # End Package)
             newTruckLeft.append(currentTruck)
 
-        # TODO: issue: packages need to be delivered
+        for item in currentTruck.packages:
+            for pack in packagesLeft:
+                if item.id == pack.id:
+                    pack.location = item.location
 
-        newProblems.append(ProblemState(newTruckLeft, oldPacksLeft))
-        newProblems.append(ProblemState(newTruckRight, oldPacksRight))
+        # TODO: issue: packages need to be delivered
+        newProblems.append(ProblemState(newTruckLeft, packagesLeft))
+        newProblems.append(ProblemState(newTruckRight, packagesRight))
 
         return newProblems
 
@@ -203,16 +227,4 @@ for i in range(grid_x):
     test[0].display()
     test = problem.successors(test[1])
 
-print()
-print()
-print("Reverse")
-print()
-print()
 
-for i in range(grid_x):
-    print("Step", i, i, i, i, i, i)
-    print("Moving right")
-    test[1].display()
-    print("Moving left")
-    test[0].display()
-    test = problem.successors(test[0])
