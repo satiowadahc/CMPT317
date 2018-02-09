@@ -1,4 +1,6 @@
 import random as rng
+import queue as q
+
 
 number_of_trucks = 1
 number_of_packs = 1
@@ -46,35 +48,46 @@ class Truck:
             if package.destination == self.location:
                 self.packages.remove(package)
 
-# class Search:
-#
-#   function search(problem, initialState, queue)
-#      queue.initialize()
-#      queue.add(initialState)
-#      while !queue.empty()
-#         here = queue.remove()
-#         if problem.isGoal(here)
-#            return here + some stats about run time costs
-#         else
-#            next = problem.successors(here)
-#            for s in next
-#                queue.add(s)
-#         end if
-#      end while
-#      return FAILED SEARCH + some stats about run time costs
+class Search:
+
+  def search(self,problem,initialState,queue):
+     queue.initialize()
+     queue.add(initialState)
+     while not queue.empty():
+        here = queue.remove()
+        if problem.isGoal(here):
+           return here #+ some stats about run time costs
+        else:
+           next = problem.successors(here)
+           for s in next:
+               queue.add(s)
+     return "FAILED SEARCH + some stats about run time costs"
 #
 # Class SearchNodes()
 #    - needs to store problem state information as well as search information
 #
-# class StateQueue:
-#    function initialize()
-#    function remove()
-#    function add(state)
-#    -- needs to be able to compare states!
-#    -- store heuristic information in the state itself!
+class StateQueue:
+
+    queue = q.Queue()
+
+
+    def add(self,state):
+        self.queue.put(state)
+
+    def remove(self):
+        return self.queue.get()
+
+    def compare(self,state1,state2):
+        if state1.cost < state2.cost:
+            return state1.cost
+        else:
+            return state2.cost
+
+
 
 # PASS BY FUCKING REFERENCE
 class ProblemState:
+
     def __init__(self, trucks, packages):
         self.trucks = trucks
         self.packages = packages
@@ -174,6 +187,7 @@ problem = Problem()
 
 # Initialize Problem State
 ps = problem.initProblemState()
+
 
 # Initialize StateQueue
 
