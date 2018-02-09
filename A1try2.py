@@ -42,8 +42,7 @@ class Truck:
         if len(self.packages) < self.capacity:
             self.packages.append(package)
 
-    def deliverPackage(self):
-        for package in self.packages:
+    def deliverPackage(self,package):
             if package.destination == self.location:
                 self.packages.remove(package)
 
@@ -142,6 +141,7 @@ class Problem:
 
         # Move Right if Possible Else Move Left
         currentTruck = cp.deepcopy(ps.trucks[0])
+        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Forwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == grid_x:
@@ -176,6 +176,7 @@ class Problem:
 
         # Move Left if possible else move right
         currentTruck = cp.deepcopy(ps.trucks[0])
+        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Backwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == 0:
