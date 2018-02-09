@@ -142,7 +142,6 @@ class Problem:
 
         # Move Right if Possible Else Move Left
         currentTruck = cp.deepcopy(ps.trucks[0])
-        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Forwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == grid_x:
@@ -151,8 +150,10 @@ class Problem:
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesRight[0].location:
                     currentTruck.pickupPackage(packagesRight[0])
-                    print("pickme")
-
+            # Check to drop off Packages
+            if len(currentTruck.packages) > 0and\
+                currentTruck.location == currentTruck.packages[0].destination:
+                    currentTruck.deliverPackage(currentTruck.package[0])
             # End Package
             newTruckRight.append(currentTruck)
         else:
@@ -161,7 +162,10 @@ class Problem:
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesRight[0].location:
                     currentTruck.pickupPackage(packagesRight[0])
-                    print("pickme")
+            # Check to drop off Packages
+            if len(currentTruck.packages) > 0 and\
+                    currentTruck.location == currentTruck.packages[0].destination:
+                        currentTruck.deliverPackage(currentTruck.package[0])
             # End Package
             newTruckRight.append(currentTruck)
 
@@ -172,7 +176,6 @@ class Problem:
 
         # Move Left if possible else move right
         currentTruck = cp.deepcopy(ps.trucks[0])
-        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Backwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == 0:
@@ -181,7 +184,10 @@ class Problem:
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesLeft[0].location:
                     currentTruck.pickupPackage(packagesLeft[0])
-                    print("pickme")
+            # Check to drop off Packages
+            if len(currentTruck.packages) > 0 and\
+                    currentTruck.location == currentTruck.packages[0].destination:
+                        currentTruck.deliverPackage(currentTruck.package[0])
             # End Package
             newTruckLeft.append(currentTruck)
         else:
@@ -190,7 +196,10 @@ class Problem:
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesLeft[0].location:
                     currentTruck.pickupPackage(packagesLeft[0])
-                    print("pickme")
+            # Check to drop off Packages
+            if len(currentTruck.packages) > 0 and\
+                    currentTruck.location == currentTruck.packages[0].destination:
+                        currentTruck.deliverPackage(currentTruck.package[0])
             # End Package)
             newTruckLeft.append(currentTruck)
 
@@ -223,8 +232,6 @@ for i in range(grid_x):
     print("Step", i,i,i,i,i,i)
     print("Moving right")
     test[1].display()
-    print("Moving left")
-    test[0].display()
     test = problem.successors(test[1])
 
 
