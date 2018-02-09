@@ -1,4 +1,5 @@
 import random as rng
+import copy as cp
 
 number_of_trucks = 1
 number_of_packs = 1
@@ -27,13 +28,13 @@ class Truck:
 
     def moveTruckRight(self):
         self.location += 1
-        # TODO issue - uninitialized has object type - nonetype
+        # TODO: Self.location has none type?
         # for item in self.packages:
         #     item.location = self.location
 
     def moveTruckLeft(self):
         self.location -= 1
-        # TODO issue - uninitialized has object type - nonetype
+        # TODO: Self.location has none type
         # for item in self.packages:
         #     item.location = self.location
 
@@ -73,7 +74,7 @@ class Truck:
 #    -- needs to be able to compare states!
 #    -- store heuristic information in the state itself!
 
-# PASS BY FUCKING REFERENCE
+
 class ProblemState:
     def __init__(self, trucks, packages):
         self.trucks = trucks
@@ -134,33 +135,28 @@ class Problem:
         # newPacksRight = []
 
         # TODO: Issue trucks are changing original problem state
-        currentTruck = ps.trucks[0]
-        print(ps.trucks[0].location)  # testing --------------
+
         # Move Right if Possible Else Move Left
+        currentTruck = cp.copy(ps.trucks[0])
         if currentTruck.location == grid_x:
             currentTruck.moveTruckLeft()
             newTruckRight.append(currentTruck)
         else:
             currentTruck.moveTruckRight()
             newTruckRight.append(currentTruck)
-        print(ps.trucks[0].location)  # testing --------------
 
         # Move Left if possible else move right
-        currentTruck = ps.trucks[0]
+        currentTruck = cp.copy(ps.trucks[0])
         if currentTruck.location == 0:
             currentTruck.moveTruckRight()
             newTruckLeft.append(currentTruck)
         else:
             currentTruck.moveTruckLeft()
             newTruckLeft.append(currentTruck)
-        print(ps.trucks[0].location)  # testing --------------
 
         # TODO: issue: packages aren't updated in problem state Maybe?
         for j in range(len(ps.packages)):
             newPacksLeft.append(ps.packages[j])
-        print(ps.trucks[0].location)  # testing --------------
-        print("Left", newTruckLeft[0].location)  # testing --------------
-        print("Right", newTruckRight[0].location)  # testing --------------
 
         newProblems.append(ProblemState(newTruckLeft, newPacksLeft))
         newProblems.append(ProblemState(newTruckRight, newPacksLeft))
@@ -178,10 +174,5 @@ ps = problem.initProblemState()
 # Initialize StateQueue
 
 # Testing Below
-# ps.display()
-# test = problem.successors(ps)
-# print(test)
-# # test[1].display()
-# print("2nd move--------------------")
-# test2 = problem.successors(test[1])
-# # test2[1].display()
+ps.display()
+test = problem.successors(ps)
