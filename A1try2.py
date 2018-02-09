@@ -42,8 +42,7 @@ class Truck:
         if len(self.packages) < self.capacity:
             self.packages.append(package)
 
-    def deliverPackage(self):
-        for package in self.packages:
+    def deliverPackage(self,package):
             if package.destination == self.location:
                 self.packages.remove(package)
 
@@ -142,7 +141,6 @@ class Problem:
 
         # Move Right if Possible Else Move Left
         currentTruck = cp.deepcopy(ps.trucks[0])
-        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Forwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == grid_x:
@@ -151,7 +149,7 @@ class Problem:
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesRight[0].location:
                     currentTruck.pickupPackage(packagesRight[0])
-                    print("pickme")
+
 
             # End Package
             newTruckRight.append(currentTruck)
@@ -161,7 +159,7 @@ class Problem:
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesRight[0].location:
                     currentTruck.pickupPackage(packagesRight[0])
-                    print("pickme")
+
             # End Package
             newTruckRight.append(currentTruck)
 
@@ -172,7 +170,6 @@ class Problem:
 
         # Move Left if possible else move right
         currentTruck = cp.deepcopy(ps.trucks[0])
-        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Backwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == 0:
@@ -181,7 +178,6 @@ class Problem:
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesLeft[0].location:
                     currentTruck.pickupPackage(packagesLeft[0])
-                    print("pickme")
             # End Package
             newTruckLeft.append(currentTruck)
         else:
@@ -190,7 +186,7 @@ class Problem:
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesLeft[0].location:
                     currentTruck.pickupPackage(packagesLeft[0])
-                    print("pickme")
+
             # End Package)
             newTruckLeft.append(currentTruck)
 
