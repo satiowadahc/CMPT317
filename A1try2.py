@@ -1,10 +1,10 @@
 import random as rng
 
-number_of_trucks=1
-number_of_packs=1
-truck_capacity=1
-grid_x=10
-grid_y=1
+number_of_trucks = 1
+number_of_packs = 1
+truck_capacity = 1
+grid_x = 10
+grid_y = 1
 
 
 class Package:
@@ -16,6 +16,9 @@ class Package:
 
 
 class Truck:
+    location = 0
+    capacity = 0
+    packages = []
 
     def __init__(self, location, capacity):
         self.location = location
@@ -24,13 +27,15 @@ class Truck:
 
     def moveTruckRight(self):
         self.location += 1
-        for item in self.packages:
-            item.location = self.location
+        # TODO issue - uninitialized has object type - nonetype
+        # for item in self.packages:
+        #     item.location = self.location
 
     def moveTruckLeft(self):
         self.location -= 1
-        for item in self.packages:
-            item.location = self.location
+        # TODO issue - uninitialized has object type - nonetype
+        # for item in self.packages:
+        #     item.location = self.location
 
     def pickupPackage(self, package):
         if len(self.packages) < self.capacity:
@@ -68,11 +73,22 @@ class Truck:
 #    -- needs to be able to compare states!
 #    -- store heuristic information in the state itself!
 
-
+# PASS BY FUCKING REFERENCE
 class ProblemState:
-     def __init__(self,trucks,packages):
+    def __init__(self, trucks, packages):
         self.trucks = trucks
         self.packages = packages
+
+    #testing only
+    def display(self):
+        print("P state -----")
+        print("trucks")
+        for i in range(len(self.trucks)):
+            print(self.trucks[i].location)
+        print("packages")
+        for i in range(len(self.packages)):
+            print(self.packages[i].location)
+        print("-----")
 
 
 class Problem:
@@ -82,7 +98,7 @@ class Problem:
 
     def __init__(self):
         for i in range(number_of_trucks):
-            self.trucks.append(Truck(0,truck_capacity))
+            self.trucks.append(Truck(0, truck_capacity))
         for i in range(number_of_packs):
             x = rng.randint(1, grid_x-1)
             y = rng.randint(1, grid_x-1)
@@ -99,46 +115,73 @@ class Problem:
         Ttest = True
         for i in ps.packs:
             if i.location == i.destination:
-                self.Ptest = True
+                Ptest = True
             else:
                 return False
         for i in ps.trucks:
             if i.location == 0:
-                self.Ttest = True
+                Ttest = True
             else:
                 return False
-        return self.Ptest and self.Ttest
+        return Ptest and Ttest
 
-
+    # Return 2 problem states for each truck in problem state
     def successors(self, ps):
         newProblems = []
-        newTrucks = []
-        newPacks = []
+        newTruckRight = []
+        newTruckLeft = []
+        newPacksLeft = []
+        # newPacksRight = []
 
-        for i in ps.trucks:
-            if i.location == 0:
-                newTrucks += i.moveRight
-            else:
-                newTrucks += i.moveLeft
-            for j in ps.trucks:
-                if j.location == 0:
-                    newTrucks += j.moveRight
-                elif j.location == grid_x:
-                    newTrucks += j.moveLeft
-                else:
-                    newTrucks += j.moveRight
-            # Add Packages from trucks
-            # TODO: Add packages
+        # TODO: Issue trucks are changing original problem state
+        currentTruck = ps.trucks[0]
+        print(ps.trucks[0].location)  # testing --------------
+        # Move Right if Possible Else Move Left
+        if currentTruck.location == grid_x:
+            currentTruck.moveTruckLeft()
+            newTruckRight.append(currentTruck)
+        else:
+            currentTruck.moveTruckRight()
+            newTruckRight.append(currentTruck)
+        print(ps.trucks[0].location)  # testing --------------
 
-        newProblems += ProblemState(newTrucks, newPacks)
+        # Move Left if possible else move right
+        currentTruck = ps.trucks[0]
+        if currentTruck.location == 0:
+            currentTruck.moveTruckRight()
+            newTruckLeft.append(currentTruck)
+        else:
+            currentTruck.moveTruckLeft()
+            newTruckLeft.append(currentTruck)
+        print(ps.trucks[0].location)  # testing --------------
+
+        # TODO: issue: packages aren't updated in problem state Maybe?
+        for j in range(len(ps.packages)):
+            newPacksLeft.append(ps.packages[j])
+        print(ps.trucks[0].location)  # testing --------------
+        print("Left", newTruckLeft[0].location)  # testing --------------
+        print("Right", newTruckRight[0].location)  # testing --------------
+
+        newProblems.append(ProblemState(newTruckLeft, newPacksLeft))
+        newProblems.append(ProblemState(newTruckRight, newPacksLeft))
+
+        newProblems[0].display()
         return newProblems
 
-# Begin Execution
 
+# Begin Execution
 problem = Problem()
 
+# Initialize Problem State
 ps = problem.initProblemState()
 
-ps.packages
+# Initialize StateQueue
 
-
+# Testing Below
+# ps.display()
+# test = problem.successors(ps)
+# print(test)
+# # test[1].display()
+# print("2nd move--------------------")
+# test2 = problem.successors(test[1])
+# # test2[1].display()
