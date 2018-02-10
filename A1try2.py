@@ -2,7 +2,7 @@ import random as rng
 import copy as cp
 import queue as q
 
-number_of_trucks = 1
+number_of_trucks = 2
 number_of_packs = 1
 truck_capacity = 1
 grid_x = 10
@@ -39,6 +39,12 @@ class Truck:
         for item in self.packages:
             item.location = self.location
 
+    def goHome(self):
+        if len(self.packages) == 0:
+            self.location = 0
+        else:
+            print("Still got work to do!")
+
     def pickupPackage(self, package):
         if package.inTransit:
             print("Package already Picked up")
@@ -53,19 +59,21 @@ class Truck:
 
 
 class Search:
-    def search(self, problem, initialState, queue):
-        #queue.initialize()
+    def search(self, problem, initialPState, queue):
+        queue= StateQueue()
         temp = ProblemState([],[])
-        queue.add(initialState)
+        queue.add(initialPState)
         while not queue.empty():
             here = queue.remove()
+            print(here)
             temp = here
             if problem.isGoal(self,here):
                 return here #+ some stats about run time costs
-        else:
-            next = problem.successors(self,temp)
-            for s in next:
-                queue.add(s)
+            else:
+                next = problem.successors(self, temp)
+                print(next)
+                for s in next:
+                    queue.add(s)
         return "FAILED SEARCH + some stats about run time costs"
 
 
@@ -102,6 +110,11 @@ class ProblemState:
     def getCost(self):
         return self.cost
 
+    def setGoal(self):
+        for item in self.packages:
+            item.location = item.destination
+        for t in self.trucks:
+            t.location = 0
 
     # testing only
     def display(self):
@@ -111,6 +124,8 @@ class ProblemState:
         for i in range(len(self.packages)):
             print("Problem State Package", self.packages[i].id, "at", self.packages[i].location)
             print("Problem State Package", self.packages[i].id, "goes to", self.packages[i].destination)
+
+
         print("-------------------")
 
 
@@ -125,7 +140,7 @@ class Problem:
         for i in range(number_of_packs):
             x = rng.randint(1, grid_x-1)
             y = rng.randint(1, grid_x-1)
-            while x == y:
+            while x < y:
                 y = rng.randint(1, grid_x-1)
             self.packages.append(Package(x, x, y, i))
 
@@ -138,8 +153,10 @@ class Problem:
         Ttest = True
 
         for i in ps.packages:
-            if i.location == i.destination:
+            if i.location == i.destination-1:
                 Ptest = True
+                for j in ps.trucks:
+                    j.goHome()
             else:
                 return False
         for i in ps.trucks:
@@ -269,9 +286,6 @@ class Problem:
             newProblems.append(ProblemState(newTruckLeft, packagesLeft))
             newProblems.append(ProblemState(newTruckRight, packagesRight))
 
-        print("this is the cost of going right: ", costRight)
-        print("this is the cost of going left: ", costLeft)
-
         return newProblems
 
 
@@ -282,21 +296,11 @@ problem = Problem()
 ps = problem.initProblemState()
 
 # Initialize StateQueue
-
-ps.display()
-# Testing Below
-test = problem.successors(ps)
 queue = StateQueue()
 
-for i in range(grid_x):
-    test = problem.successors(test[1])
+# testing the search function
+search = Search()
+search.search(Problem, ps, queue)
+print(problem.isGoal(ps))
 
-test[1].display()
-
-    queue.add(test[1])
-
-
-#testing the search function
-search =  Search()
-search.search(Problem,ps,queue)
 
