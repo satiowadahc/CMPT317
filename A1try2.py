@@ -16,6 +16,7 @@ class Package:
         self.source = source
         self.destination = destination
         self.id = id
+        self.inTransit = False
 
 
 class Truck:
@@ -39,8 +40,13 @@ class Truck:
             item.location = self.location
 
     def pickupPackage(self, package):
-        if len(self.packages) < self.capacity:
-            self.packages.append(package)
+        if package.inTransit:
+            print("Package already Picked up")
+        else:
+            package.inTransit = True
+            if len(self.packages) < self.capacity:
+                self.packages.append(package)
+
 
     def deliverPackage(self,package):
             if package.destination == self.location:
@@ -91,10 +97,10 @@ class ProblemState:
     def display(self):
         print("Problem state -----")
         for i in range(len(self.trucks)):
-            print("Problem State Truck at", self.trucks[i].location)
+            print("Problem State Truck", i, "at", self.trucks[i].location)
         for i in range(len(self.packages)):
-            print("Problem State Package at", self.packages[i].location)
-            print("Problem State Package goes to", self.packages[i].destination)
+            print("Problem State Package", self.packages[i].id, "at", self.packages[i].location)
+            print("Problem State Package", self.packages[i].id, "goes to", self.packages[i].destination)
         print("-------------------")
 
 
@@ -139,78 +145,116 @@ class Problem:
         newTruckLeft = []
         packagesRight = cp.deepcopy(ps.packages)
         packagesLeft = cp.deepcopy(ps.packages)
+        packagesDropped = []
 
-        # Move Right if Possible Else Move Left
-        currentTruck = cp.deepcopy(ps.trucks[0])
-        if len(currentTruck.packages) != 0:
-            print("Forwards Truck Pack", currentTruck.packages[0].location)
-        if currentTruck.location == grid_x:
-            currentTruck.moveTruckLeft()
-            # Check to Pick up package
-            if currentTruck.capacity > len(currentTruck.packages) and\
-                currentTruck.location == packagesRight[0].location:
-                    currentTruck.pickupPackage(packagesRight[0])
-            # Check to drop off Packages
-            if len(currentTruck.packages) > 0and\
-                currentTruck.location == currentTruck.packages[0].destination:
-                    currentTruck.deliverPackage(currentTruck.package[0])
-            # End Package
-            newTruckRight.append(currentTruck)
-        else:
-            currentTruck.moveTruckRight()
-            # Check to Pick up package
-            if currentTruck.capacity > len(currentTruck.packages) and\
-                currentTruck.location == packagesRight[0].location:
-                    currentTruck.pickupPackage(packagesRight[0])
-            # Check to drop off Packages
-            if len(currentTruck.packages) > 0 and\
+        for t in range(len(ps.trucks)):
+            # Move Right if Possible Else Move Left
+            currentTruck = cp.deepcopy(ps.trucks[0])
+            if currentTruck.location == grid_x:
+                currentTruck.moveTruckLeft()
+                # Check to Pick up package
+                if currentTruck.capacity > len(currentTruck.packages) and\
+                    currentTruck.location == packagesRight[0].location:
+                        currentTruck.pickupPackage(packagesRight[0])
+                        packagesRight[0].inTransit=True
+                        if len(currentTruck.packages) > 0:
+                            print(t, "Picking up at:", currentTruck.packages[0].location)
+                # Check to drop off Packages
+                if len(currentTruck.packages) > 0 and\
                     currentTruck.location == currentTruck.packages[0].destination:
-                        currentTruck.deliverPackage(currentTruck.packages[0])
-            # End Package
-            newTruckRight.append(currentTruck)
-
-        for item in currentTruck.packages:
-            for pack in packagesRight:
-                if item.id == pack.id:
-                    pack.location = item.location
-
-        # Move Left if possible else move right
-        currentTruck = cp.deepcopy(ps.trucks[0])
-        if len(currentTruck.packages) != 0:
-            print("Backwards Truck Pack", currentTruck.packages[0].location)
-        if currentTruck.location == 0:
-            currentTruck.moveTruckRight()
-            # Check to Pick up package
-            if currentTruck.capacity > len(currentTruck.packages) and\
-                currentTruck.location == packagesLeft[0].location:
-                    currentTruck.pickupPackage(packagesLeft[0])
-            # Check to drop off Packages
-            if len(currentTruck.packages) > 0 and\
-                    currentTruck.location == currentTruck.packages[0].destination:
+                        packagesDropped.append(currentTruck.packages[0])
                         currentTruck.deliverPackage(currentTruck.package[0])
-            # End Package
-            newTruckLeft.append(currentTruck)
-        else:
-            currentTruck.moveTruckLeft()
-            # Check to Pick up package
-            if currentTruck.capacity > len(currentTruck.packages) and\
-                currentTruck.location == packagesLeft[0].location:
-                    currentTruck.pickupPackage(packagesLeft[0])
-            # Check to drop off Packages
-            if len(currentTruck.packages) > 0 and\
-                    currentTruck.location == currentTruck.packages[0].destination:
-                        currentTruck.deliverPackage(currentTruck.packages[0])
-            # End Package)
-            newTruckLeft.append(currentTruck)
+                        print(t, "Dropping off at:", currentTruck.packages[0].location)
+                        print("When Truck is at:", currentTruck.location)
+                # End Package
+                newTruckRight.append(currentTruck)
+            else:
+                currentTruck.moveTruckRight()
+                # Check to Pick up package
+                if currentTruck.capacity > len(currentTruck.packages) and\
+                    currentTruck.location == packagesRight[0].location:
+                        currentTruck.pickupPackage(packagesRight[0])
+                        packagesRight[0].inTransit = True
+                        if len(currentTruck.packages)>0:
+                            print(t, "Picking up at:", currentTruck.packages[0].location)
+                # Check to drop off Packages
+                if len(currentTruck.packages) > 0 and\
+                        currentTruck.location == currentTruck.packages[0].destination:
+                    packagesDropped.append(currentTruck.packages[0])
+                    print(t, "Dropping off at:", currentTruck.packages[0].location)
+                    print("When Truck is at:", currentTruck.location)
+                    currentTruck.deliverPackage(currentTruck.packages[0])
 
-        for item in currentTruck.packages:
-            for pack in packagesLeft:
-                if item.id == pack.id:
-                    pack.location = item.location
+                # End Package
+                newTruckRight.append(currentTruck)
 
-        # TODO: issue: packages need to be delivered
-        newProblems.append(ProblemState(newTruckLeft, packagesLeft))
-        newProblems.append(ProblemState(newTruckRight, packagesRight))
+            for item in currentTruck.packages:
+                for pack in packagesRight:
+                    if item.id == pack.id:
+                        pack.location = item.location
+            if len(packagesDropped) > 0:
+                print(packagesDropped[0].location)
+            for item in packagesDropped:
+                for pack in packagesLeft:
+                    if item.id == pack.id:
+                        pack.location += item.location
+
+            # Move Left if possible else move right
+            currentTruck = cp.deepcopy(ps.trucks[0])
+            if currentTruck.location == 0:
+                currentTruck.moveTruckRight()
+                # Check to Pick up package
+                if currentTruck.capacity > len(currentTruck.packages) and\
+                    currentTruck.location == packagesLeft[0].location:
+                        currentTruck.pickupPackage(packagesLeft[0])
+                        packagesLeft[0].inTransit = True
+                        if len(currentTruck.packages) > 0:
+                            print(t, "Picking up at:", currentTruck.packages[0].location)
+                # Check to drop off Packages
+                if len(currentTruck.packages) > 0 and\
+                        currentTruck.location == currentTruck.packages[0].destination:
+                            print(t, "Dropping off at:", currentTruck.packages[0].location)
+                            print("When Truck is at:", currentTruck.location)
+                            packagesDropped.append(currentTruck.packages[0])
+                            currentTruck.deliverPackage(currentTruck.packages[0])
+
+                # End Package
+                newTruckLeft.append(currentTruck)
+            else:
+                currentTruck.moveTruckLeft()
+                # Check to Pick up package
+                if currentTruck.capacity > len(currentTruck.packages) and\
+                   currentTruck.location == packagesLeft[0].location:
+                        currentTruck.pickupPackage(packagesLeft[0])
+                        packagesLeft[0].inTransit = True
+                        if len(currentTruck.packages) > 0:
+                            print(t, "Picking up at:", currentTruck.packages[0].location)
+                # Check to drop off Packages
+                if len(currentTruck.packages) > 0 and\
+                   currentTruck.location == currentTruck.packages[0].destination:
+                    print(t, "Dropping off at:", currentTruck.packages[0].location)
+                    print("When Truck is at:", currentTruck.location)
+                    packagesDropped.append(currentTruck.packages[0])
+                    currentTruck.deliverPackage(currentTruck.packages[0])
+
+
+                # End Package)
+                newTruckLeft.append(currentTruck)
+
+            for item in currentTruck.packages:
+                for pack in packagesLeft:
+                    if item.id == pack.id:
+                        pack.location = item.location
+            if len(packagesDropped) > 0:
+                print(packagesDropped[0].location)
+            for item in packagesDropped:
+                for pack in packagesLeft:
+                    if item.id == pack.id:
+                        pack.location += item.location
+
+            # TODO: issue: packages need to be delivered
+            newProblems.append(ProblemState(newTruckLeft, packagesLeft))
+            newProblems.append(ProblemState(newTruckRight, packagesRight))
 
         return newProblems
 
@@ -221,7 +265,6 @@ problem = Problem()
 # Initialize Problem State
 ps = problem.initProblemState()
 
-
 # Initialize StateQueue
 
 ps.display()
@@ -229,9 +272,7 @@ ps.display()
 test = problem.successors(ps)
 
 for i in range(grid_x):
-    print("Step", i,i,i,i,i,i)
-    print("Moving right")
-    test[1].display()
     test = problem.successors(test[1])
 
+test[1].display()
 
