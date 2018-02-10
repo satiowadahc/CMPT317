@@ -1,24 +1,43 @@
+# Assignment 1 for CMPT 317 A.I.
+# Written by Chad Woitas and Brandon Bachynski
+# Due Sunday Feb 11
+# Current code at https://github.com/satiowadahc/CMPT317
+#
+# All libraries are published under open source
+# https://opensource.org/licenses/Python-2.0
+
+# Algorithm to learn the best path for a delivery truck to
+# pick up and deliver all packages, then return to its start point
+
 import random as rng
 import copy as cp
 import queue as q
 
-number_of_trucks = 2
+# Set Parameters
+number_of_trucks = 1
 number_of_packs = 1
 truck_capacity = 1
 grid_x = 10
-grid_y = 1
+# Currently code is for linear search
+# grid_y = 1
 
 
+# Package objects
+# Zero function on the world around them
+# Can be manipulated
 class Package:
 
-    def __init__(self, location, source, destination, id):
+    def __init__(self, location, source, destination, pid):
         self.location = location
         self.source = source
         self.destination = destination
-        self.id = id
+        self.id = pid
         self.inTransit = False
 
 
+# Truck objects
+# Can move itself and any packages on board
+# Will only carry as many packages as listed above
 class Truck:
     location = 0
     capacity = 0
@@ -39,6 +58,7 @@ class Truck:
         for item in self.packages:
             item.location = self.location
 
+    # return to garage if no packages are on board
     def goHome(self):
         if len(self.packages) == 0:
             self.location = 0
@@ -53,32 +73,31 @@ class Truck:
             if len(self.packages) < self.capacity:
                 self.packages.append(package)
 
-    def deliverPackage(self,package):
+    def deliverPackage(self, package):
             if package.destination == self.location:
                 self.packages.remove(package)
 
 
+# Function for Scanning the effects of a truck moving left or right
 class Search:
-    def search(self, problem, initialPState, queue):
-        queue= StateQueue()
-        temp = ProblemState([],[])
-        queue.add(initialPState)
-        while not queue.empty():
-            here = queue.remove()
-            print(here)
-            temp = here
-            if problem.isGoal(self,here):
-                return here #+ some stats about run time costs
+    @staticmethod
+    def search(currentProblem, initialPState, stateQueue):
+        stateQueue.add(initialPState)
+        count = 0
+        while not stateQueue.empty():
+            count += 1
+            print(count)
+            here = stateQueue.remove()
+            if currentProblem.isGoal(here):
+                return here
             else:
-                next = problem.successors(self, temp)
-                print(next)
-                for s in next:
-                    queue.add(s)
-        return "FAILED SEARCH + some stats about run time costs"
+                nextState = currentProblem.successors(here)
+                for s in nextState:
+                    stateQueue.add(s)
+        return "FAILED SEARCH"
 
 
 # Class SearchNodes()
-#    - needs to store problem state information as well as search information
 class StateQueue:
 
     def __init__(self):
@@ -91,9 +110,10 @@ class StateQueue:
         return self.queue.get()
 
     def empty(self):
-        return  self.queue.empty()
+        return self.queue.empty()
 
-    def compare(self, state1, state2):
+    @staticmethod
+    def compare(state1, state2):
         if state1.cost < state2.cost:
             return state1.cost
         else:
@@ -103,6 +123,7 @@ class StateQueue:
 class ProblemState:
 
     cost = 0
+
     def __init__(self, trucks, packages):
         self.trucks = trucks
         self.packages = packages
@@ -124,8 +145,6 @@ class ProblemState:
         for i in range(len(self.packages)):
             print("Problem State Package", self.packages[i].id, "at", self.packages[i].location)
             print("Problem State Package", self.packages[i].id, "goes to", self.packages[i].destination)
-
-
         print("-------------------")
 
 
@@ -148,50 +167,57 @@ class Problem:
         return ProblemState(self.trucks, self.packages)
 
     # True until proven False
-    def isGoal(self, ps):
-        Ptest = True
-        Ttest = True
+    @staticmethod
+    def isGoal(gps):
+        PackTest = True
+        TruckTest = True
 
-        for i in ps.packages:
+        for i in gps.packages:
             if i.location == i.destination-1:
-                Ptest = True
-                for j in ps.trucks:
+                PackTest = True
+                for j in gps.trucks:
                     j.goHome()
             else:
                 return False
-        for i in ps.trucks:
+        for i in gps.trucks:
             if i.location == 0:
-                Ttest = True
+                TruckTest = True
             else:
                 return False
-        return Ptest and Ttest
+        return PackTest and TruckTest
 
     # Return 2 problem states for each truck in problem state
-    def successors(self, ps):
+    @staticmethod
+    def successors(ps):
         newProblems = []
         newTruckRight = []
         newTruckLeft = []
-        packagesRight = cp.deepcopy(ps.packages)
-        packagesLeft = cp.deepcopy(ps.packages)
-        costLeft = cp.deepcopy(ps.cost)
-        costRight = cp.deepcopy(ps.cost)
+        packagesRight = cp.copy(ps.packages)
+        packagesLeft = cp.copy(ps.packages)
+        # For Adding cost analysis later on
+        # costLeft = cp.deepcopy(ps.cost)
+        # costRight = cp.deepcopy(ps.cost)
         packagesDropped = []
 
+        # need to add loops for packages and mulitple directions
         for t in range(len(ps.trucks)):
             # Move Right if Possible Else Move Left
             currentTruck = cp.deepcopy(ps.trucks[0])
             if currentTruck.location == grid_x:
                 currentTruck.moveTruckLeft()
+
                 # Check to Pick up package
-                if currentTruck.capacity > len(currentTruck.packages) and\
-                    currentTruck.location == packagesRight[0].location:
+                if(currentTruck.capacity > len(currentTruck.packages) and
+                    currentTruck.location == packagesRight[0].location
+                   ):
                         currentTruck.pickupPackage(packagesRight[0])
-                        packagesRight[0].inTransit=True
+                        packagesRight[0].inTransit = True
                         if len(currentTruck.packages) > 0:
                             print(t, "Picking up at:", currentTruck.packages[0].location)
                 # Check to drop off Packages
-                if len(currentTruck.packages) > 0 and\
-                    currentTruck.location == currentTruck.packages[0].destination:
+                if(len(currentTruck.packages) > 0 and
+                   currentTruck.location == currentTruck.packages[0].destination
+                   ):
                         packagesDropped.append(currentTruck.packages[0])
                         currentTruck.deliverPackage(currentTruck.package[0])
                         print(t, "Dropping off at:", currentTruck.packages[0].location)
@@ -201,20 +227,21 @@ class Problem:
             else:
                 currentTruck.moveTruckRight()
                 # Check to Pick up package
-                if currentTruck.capacity > len(currentTruck.packages) and\
-                    currentTruck.location == packagesRight[0].location:
+                if(currentTruck.capacity > len(currentTruck.packages) and
+                   currentTruck.location == packagesRight[0].location
+                   ):
                         currentTruck.pickupPackage(packagesRight[0])
                         packagesRight[0].inTransit = True
-                        if len(currentTruck.packages)>0:
+                        if len(currentTruck.packages) > 0:
                             print(t, "Picking up at:", currentTruck.packages[0].location)
                 # Check to drop off Packages
-                if len(currentTruck.packages) > 0 and\
-                        currentTruck.location == currentTruck.packages[0].destination:
-                    packagesDropped.append(currentTruck.packages[0])
-                    print(t, "Dropping off at:", currentTruck.packages[0].location)
-                    print("When Truck is at:", currentTruck.location)
-                    currentTruck.deliverPackage(currentTruck.packages[0])
-
+                if(len(currentTruck.packages) > 0 and
+                   currentTruck.location == currentTruck.packages[0].destination
+                   ):
+                        packagesDropped.append(currentTruck.packages[0])
+                        print(t, "Dropping off at:", currentTruck.packages[0].location)
+                        print("When Truck is at:", currentTruck.location)
+                        currentTruck.deliverPackage(currentTruck.packages[0])
                 # End Package
                 newTruckRight.append(currentTruck)
 
@@ -234,8 +261,9 @@ class Problem:
             if currentTruck.location == 0:
                 currentTruck.moveTruckRight()
                 # Check to Pick up package
-                if currentTruck.capacity > len(currentTruck.packages) and\
-                    currentTruck.location == packagesLeft[0].location:
+                if(currentTruck.capacity > len(currentTruck.packages) and
+                    currentTruck.location == packagesLeft[0].location
+                   ):
                         currentTruck.pickupPackage(packagesLeft[0])
                         packagesLeft[0].inTransit = True
                         if len(currentTruck.packages) > 0:
@@ -267,7 +295,6 @@ class Problem:
                     packagesDropped.append(currentTruck.packages[0])
                     currentTruck.deliverPackage(currentTruck.packages[0])
 
-
                 # End Package)
                 newTruckLeft.append(currentTruck)
 
@@ -282,7 +309,6 @@ class Problem:
                     if item.id == pack.id:
                         pack.location += item.location
 
-            # TODO: issue: packages need to be delivered
             newProblems.append(ProblemState(newTruckLeft, packagesLeft))
             newProblems.append(ProblemState(newTruckRight, packagesRight))
 
@@ -302,5 +328,3 @@ queue = StateQueue()
 search = Search()
 search.search(Problem, ps, queue)
 print(problem.isGoal(ps))
-
-
