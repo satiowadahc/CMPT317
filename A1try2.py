@@ -94,6 +94,7 @@ class ProblemState:
             print("Problem State Truck at", self.trucks[i].location)
         for i in range(len(self.packages)):
             print("Problem State Package at", self.packages[i].location)
+            print("Problem State Package goes to", self.packages[i].destination)
         print("-------------------")
 
 
@@ -175,7 +176,6 @@ class Problem:
 
         # Move Left if possible else move right
         currentTruck = cp.deepcopy(ps.trucks[0])
-        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Backwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == 0:
@@ -199,7 +199,7 @@ class Problem:
             # Check to drop off Packages
             if len(currentTruck.packages) > 0 and\
                     currentTruck.location == currentTruck.packages[0].destination:
-                        currentTruck.deliverPackage(currentTruck.package[0])
+                        currentTruck.deliverPackage(currentTruck.packages[0])
             # End Package)
             newTruckLeft.append(currentTruck)
 
