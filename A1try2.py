@@ -103,9 +103,9 @@ class ProblemState:
         print("Problem state -----")
         for i in range(len(self.trucks)):
             print("Problem State Truck at", self.trucks[i].location)
-            print("Destination at ", self.packages[i].destination)
         for i in range(len(self.packages)):
             print("Problem State Package at", self.packages[i].location)
+            print("Problem State Package goes to", self.packages[i].destination)
         print("-------------------")
 
 
@@ -187,6 +187,7 @@ class Problem:
                     currentTruck.location == currentTruck.packages[0].destination:
                         currentTruck.deliverPackage(currentTruck.packages[0])
                         costRight -= 1
+
             # End Package
             newTruckRight.append(currentTruck)
 
