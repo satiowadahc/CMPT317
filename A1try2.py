@@ -49,14 +49,16 @@ class Truck:
 
 class Search:
     def search(self, problem, initialState, queue):
-        queue.initialize()
+        #queue.initialize()
+        temp = ProblemState([],[])
         queue.add(initialState)
         while not queue.empty():
             here = queue.remove()
-            if problem.isGoal(here):
+            temp = here
+            if problem.isGoal(self,here):
                 return here #+ some stats about run time costs
         else:
-            next = problem.successors(here)
+            next = problem.successors(self,temp)
             for s in next:
                 queue.add(s)
         return "FAILED SEARCH + some stats about run time costs"
@@ -66,13 +68,17 @@ class Search:
 #    - needs to store problem state information as well as search information
 class StateQueue:
 
-    queue = q.Queue()
+    def __init__(self):
+        self.queue = q.Queue()
 
     def add(self, state):
         self.queue.put(state)
 
     def remove(self):
         return self.queue.get()
+
+    def empty(self):
+        return  self.queue.empty()
 
     def compare(self, state1, state2):
         if state1.cost < state2.cost:
@@ -83,15 +89,21 @@ class StateQueue:
 
 class ProblemState:
 
+    cost = 0
     def __init__(self, trucks, packages):
         self.trucks = trucks
         self.packages = packages
+
+    def getCost(self):
+        return self.cost
+
 
     # testing only
     def display(self):
         print("Problem state -----")
         for i in range(len(self.trucks)):
             print("Problem State Truck at", self.trucks[i].location)
+            print("Destination at ", self.packages[i].destination)
         for i in range(len(self.packages)):
             print("Problem State Package at", self.packages[i].location)
         print("-------------------")
@@ -119,7 +131,8 @@ class Problem:
     def isGoal(self, ps):
         Ptest = True
         Ttest = True
-        for i in ps.packs:
+
+        for i in ps.packages:
             if i.location == i.destination:
                 Ptest = True
             else:
@@ -138,34 +151,42 @@ class Problem:
         newTruckLeft = []
         packagesRight = cp.deepcopy(ps.packages)
         packagesLeft = cp.deepcopy(ps.packages)
+        costLeft = cp.deepcopy(ps.cost)
+        costRight = cp.deepcopy(ps.cost)
 
         # Move Right if Possible Else Move Left
         currentTruck = cp.deepcopy(ps.trucks[0])
-        print(currentTruck.packages)
         if len(currentTruck.packages) != 0:
             print("Forwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == grid_x:
             currentTruck.moveTruckLeft()
+            costRight += 1
             # Check to Pick up package
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesRight[0].location:
                     currentTruck.pickupPackage(packagesRight[0])
+                    costRight -= 1
             # Check to drop off Packages
             if len(currentTruck.packages) > 0and\
                 currentTruck.location == currentTruck.packages[0].destination:
                     currentTruck.deliverPackage(currentTruck.package[0])
+                    costRight -= 1
             # End Package
             newTruckRight.append(currentTruck)
+
         else:
             currentTruck.moveTruckRight()
+            costRight += 1
             # Check to Pick up package
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesRight[0].location:
                     currentTruck.pickupPackage(packagesRight[0])
+                    costRight -= 1
             # Check to drop off Packages
             if len(currentTruck.packages) > 0 and\
                     currentTruck.location == currentTruck.packages[0].destination:
-                        currentTruck.deliverPackage(currentTruck.package[0])
+                        currentTruck.deliverPackage(currentTruck.packages[0])
+                        costRight -= 1
             # End Package
             newTruckRight.append(currentTruck)
 
@@ -176,31 +197,38 @@ class Problem:
 
         # Move Left if possible else move right
         currentTruck = cp.deepcopy(ps.trucks[0])
-        print(currentTruck.packages)
+
         if len(currentTruck.packages) != 0:
             print("Backwards Truck Pack", currentTruck.packages[0].location)
         if currentTruck.location == 0:
             currentTruck.moveTruckRight()
+            costLeft += 1
             # Check to Pick up package
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesLeft[0].location:
                     currentTruck.pickupPackage(packagesLeft[0])
+                    costLeft -= 1
             # Check to drop off Packages
             if len(currentTruck.packages) > 0 and\
                     currentTruck.location == currentTruck.packages[0].destination:
                         currentTruck.deliverPackage(currentTruck.package[0])
+                        costLeft -= 1
             # End Package
             newTruckLeft.append(currentTruck)
         else:
             currentTruck.moveTruckLeft()
+            costLeft += 1
             # Check to Pick up package
             if currentTruck.capacity > len(currentTruck.packages) and\
                 currentTruck.location == packagesLeft[0].location:
                     currentTruck.pickupPackage(packagesLeft[0])
+                    costLeft -= 1
             # Check to drop off Packages
             if len(currentTruck.packages) > 0 and\
                     currentTruck.location == currentTruck.packages[0].destination:
-                        currentTruck.deliverPackage(currentTruck.package[0])
+                        currentTruck.deliverPackage(currentTruck.packages[0])
+                        costLeft -= 1
+
             # End Package)
             newTruckLeft.append(currentTruck)
 
@@ -212,6 +240,9 @@ class Problem:
         # TODO: issue: packages need to be delivered
         newProblems.append(ProblemState(newTruckLeft, packagesLeft))
         newProblems.append(ProblemState(newTruckRight, packagesRight))
+
+        print("this is the cost of going right: ", costRight)
+        print("this is the cost of going left: ", costLeft)
 
         return newProblems
 
@@ -228,6 +259,7 @@ ps = problem.initProblemState()
 ps.display()
 # Testing Below
 test = problem.successors(ps)
+queue = StateQueue()
 
 for i in range(grid_x):
     print("Step", i,i,i,i,i,i)
@@ -235,4 +267,11 @@ for i in range(grid_x):
     test[1].display()
     test = problem.successors(test[1])
 
+
+    queue.add(test[1])
+
+
+#testing the search function
+search =  Search()
+search.search(Problem,ps,queue)
 
