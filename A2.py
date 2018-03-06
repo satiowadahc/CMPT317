@@ -23,6 +23,12 @@ class Board:
 
     # def display(self):
 
+    def move(self, who, where):
+
+        gs = self.gameState.copy()
+        gs[where] = who
+        return gs
+
 
 class queen:
     x = 0
