@@ -25,34 +25,88 @@ class board:
 
         self.updateBoard()
 
+    # resets board to built in variables
+    # does not move players
     def updateBoard(self):
+        self.board = [[0 for x in range(self.x)] for y in range(self.y)]
         (m, n) = self.Q.getCurrentPosition()
-        self.board[m][n] = self.Q
-
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.Q
         (m, n) = self.D1.getCurrentPosition()
-        self.board[m][n] = self.D1
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.D1
         (m, n) = self.D2.getCurrentPosition()
-        self.board[m][n] = self.D2
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.D2
         (m, n) = self.D3.getCurrentPosition()
-        self.board[m][n] = self.D3
-
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.D3
         (m, n) = self.P1.getCurrentPosition()
-        self.board[m][n] = self.P1
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.P1
         (m, n) = self.P2.getCurrentPosition()
-        self.board[m][n] = self.P2
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.P2
         (m, n) = self.P3.getCurrentPosition()
-        self.board[m][n] = self.P3
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.P3
         (m, n) = self.P4.getCurrentPosition()
-        self.board[m][n] = self.P4
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.P4
         (m, n) = self.P5.getCurrentPosition()
-        self.board[m][n] = self.P5
+        if isinstance(self.board[m][n], int):
+            self.board[m][n] = self.P5
+
+    def isQueen(self, x, y):
+        return isinstance(self.board[x][y], queen)
+
+    def isDragon(self, x, y):
+        return isinstance(self.board[x][y], dragon)
+
+    def isPawn(self, x, y):
+        return isinstance(self.board[x][y], pawn)
+
+    def isPlayer(self, x, y):
+        return self.isDragon(x, y) or self.isPawn(x, y) or self.isQueen(x, y)
+
+    # TODO Cross check with available moves
+    def movePlayer(self, x1, y1, x2, y2):
+        # Player Good and empty square
+        if self.isPlayer(x1, y1) and not self.isPlayer(x2, y2):
+            self.board[x2][y2] = self.board[x1][y1]
+            self.board[x1][y1] = 0
+        elif self.isPawn(x1, y1) and self.isPawn(x2, y2):
+            print("Friendly Fire")
+        elif self.isPawn(x1, y1) and self.isDragon(x2, y2):
+            self.board[x2][y2] = self.board[x1][y1]
+            self.board[x1][y1] = 0
+            # Kill Dragon
+        elif self.isPawn(x1, y1) and self.isQueen(x2, y2):
+            self.board[x2][y2] = self.board[x1][y1]
+            self.board[x1][y1] = 0
+            print('Winner Winner')
+        elif self.isDragon(x1, y1) and self.isDragon(x2, y2):
+            print('Friendly fire')
+        elif self.isDragon(x1, y1) and self.isQueen(x2, y2):
+            print('Friendly Fire')
+        elif self.isDragon(x1, y1) and self.isPawn(x2, y2):
+            self.board[x2][y2] = self.board[x1][y1]
+            self.board[x1][y1] = 0
+            # Kill Pawn
+        elif self.isQueen(x1, y1) and self.isDragon(x2, y2):
+            print('Friendly Fire')
+        elif self.isQueen(x1, y1) and self.isPawn(x2, y2):
+            self.board[x2][y2] = self.board[x1][y1]
+            self.board[x1][y1] = 0
+            # Kill Pawn
+        else:
+            print("Must not be a player there")
 
     def display(self):
+        print('')
         for i in range(self.x):
             for j in range(self.y):
-                if isinstance(self.board[i][j], queen) or \
-                   isinstance(self.board[i][j], dragon) or \
-                   isinstance(self.board[i][j], pawn):
+                if self.isPlayer(i, j):
                     print(self.board[i][j].display(), end='')
                 else:
                     print(self.board[i][j], end='')
@@ -238,4 +292,22 @@ print(p.getCurrentPosition())
 print(p.nextAvailableMoves())
 
 b = board()
+b.display()
+
+b.movePlayer(0, 2, 0, 1)
+b.display()
+
+b.movePlayer(0, 1, 1, 1)
+b.display()
+
+b.movePlayer(1, 2, 2, 2)
+b.display()
+
+b.movePlayer(2, 2, 3, 2)
+b.display()
+
+b.movePlayer(3, 2, 4, 2)
+b.display()
+
+b.movePlayer(4, 2, 3, 2)
 b.display()
