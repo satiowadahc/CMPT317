@@ -301,24 +301,3 @@ def minimax(start):
     # print(transpositionTable)
     return result
 
-b = board(None,1,0)
-b.display()
-
-b.movePlayer(0, 2, 0, 1)
-b.display()
-
-b.movePlayer(0, 1, 1, 1)
-b.display()
-
-b.movePlayer(1, 2, 2, 2)
-b.display()
-
-b.movePlayer(2, 2, 3, 2)
-b.display()
-
-b.movePlayer(3, 2, 4, 2)
-b.display()
-
-b.movePlayer(4, 2, 3, 2)
-b.display()
-
