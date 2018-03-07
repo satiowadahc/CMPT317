@@ -3,6 +3,79 @@
 # Chad A. Woitas
 
 
+class token:
+
+    def __init__(self, type, x, y):
+        self.type = type
+        self.x = x
+        self.y = y
+        self.alive = True
+
+    def isDragon(self):
+        return self.type == 'dragon'
+
+    def isQueen(self):
+        return self.type == 'queen'
+
+    def isPawn(self):
+        return self.type == 'pawn'
+
+    # @param foe - type token
+    def isEnemy(self, foe):
+        if self.isPawn():
+            return foe.isPawn()
+        elif self.isDragon() or self.isQueen():
+            return foe.isDragon();
+        else:
+            print('ERROR not a valid type')
+
+    # @param foe - type token
+    def nextAvailableMoves(self):
+        # 1 Free Movement
+        if 0 < self.x < 4 and 0 < self.y < 4:
+            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
+                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1),
+                    (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
+        # 2 Can't Go NegX
+        elif self.x == 0 and 1 < self.y < 4:
+            return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1),
+                    (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
+        # 3 Can't go PosX
+        elif self.x == 4 and 0 < self.y < 4:
+            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x, self.y + 1),
+                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1)}
+        # 4 Can't go NegY
+        elif 0 < self.x < 4 and self.y == 0:
+            return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
+                    (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)}
+        # 5 Can't go PosY
+        elif 0 < self.x < 4 and self.y == 4:
+            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y),
+                    (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)}
+        # 6 Can't go NegX or NegY
+        elif self.x == 0 and self.y == 0:
+            return {(self.x + 1, self.y), (self.x, self.y + 1),
+                    (self.x + 1, self.y + 1)}
+        # 7 Can't go NegX or PosY
+        elif self.x == 0 and self.y == 4:
+            return {(self.x, self.y - 1), (self.x + 1, self.y),
+                    (self.x + 1, self.y - 1)}
+        # 8 Can't go PosX or PosY
+        elif self.x == 4 and self.y == 4:
+            return {(self.x, self.y - 1), (self.x - 1, self.y),
+                    (self.x - 1, self.y - 1)}
+        # 9 Can't go PosX or NegY
+        elif self.x == 4 and self.y == 0:
+            return {(self.x - 1, self.y), (self.x, self.y + 1),
+                    (self.x - 1, self.y + 1)}
+        else:
+            return None
+
+
+
+    @staticmethod
+    def display():
+        return 'd'
 class board:
 
     q = token('queen',None,None)
@@ -101,14 +174,6 @@ class board:
         if isinstance(self.board[m][n], int):
             self.board[m][n] = self.P5
 
-    def isQueen(self, x, y):
-        return isinstance(self.board[x][y], queen)
-
-    def isDragon(self, x, y):
-        return isinstance(self.board[x][y], dragon)
-
-    def isPawn(self, x, y):
-        return isinstance(self.board[x][y], pawn)
 
     def isPlayer(self, x, y):
         return self.isDragon(x, y) or self.isPawn(x, y) or self.isQueen(x, y)
@@ -131,8 +196,24 @@ class board:
         if self.chachedWin is False:
             if player == 0:
                 if self.q.y == 4:
+                    self.chachedWin = True
+                    self.chachedWinner = player
                     return True
-                elif
+
+                for val in self.pawns:
+                    if val.x != None or val.y !=None:
+                        return False
+                    else:
+                        self.chachedWin = True
+                        self.chachedWinner = player
+                        return True
+            if player == 1:
+                if self.q.x == None and self.q.y == None:
+                    self.chachedWin = True
+                    self.chachedWinner = player
+                    return True
+        else:
+            return player == self.chachedWinner
 
     # Used for switching player
     def togglePlayer(self,p):
@@ -191,132 +272,8 @@ class board:
         return gs
 
 
-class token:
-
-    def __init__(self, type, x, y):
-        self.type = type
-        self.x = x
-        self.y = y
-        self.alive = True
-
-    def isDragon(self):
-        return self.type == 'dragon'
-
-    def isQueen(self):
-        return self.type == 'queen'
-
-    def isPawn(self):
-        return self.type == 'pawn'
-
-    # @param foe - type token
-    def isEnemy(self, foe):
-        if self.isPawn():
-            return foe.isPawn()
-        elif self.isDragon() or self.isQueen():
-            return foe.isDragon();
-        else:
-            print('ERROR not a valid type')
-
-    # @param foe - type token
-    def nextAvailableMoves(self):
-        # 1 Free Movement
-        if 0 < self.x < 4 and 0 < self.y < 4:
-            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1),
-                    (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
-        # 2 Can't Go NegX
-        elif self.x == 0 and 1 < self.y < 4:
-            return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
-        # 3 Can't go PosX
-        elif self.x == 4 and 0 < self.y < 4:
-            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1)}
-        # 4 Can't go NegY
-        elif 0 < self.x < 4 and self.y == 0:
-            return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)}
-        # 5 Can't go PosY
-        elif 0 < self.x < 4 and self.y == 4:
-            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y),
-                    (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)}
-        # 6 Can't go NegX or NegY
-        elif self.x == 0 and self.y == 0:
-            return {(self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x + 1, self.y + 1)}
-        # 7 Can't go NegX or PosY
-        elif self.x == 0 and self.y == 4:
-            return {(self.x, self.y - 1), (self.x + 1, self.y),
-                    (self.x + 1, self.y - 1)}
-        # 8 Can't go PosX or PosY
-        elif self.x == 4 and self.y == 4:
-            return {(self.x, self.y - 1), (self.x - 1, self.y),
-                    (self.x - 1, self.y - 1)}
-        # 9 Can't go PosX or NegY
-        elif self.x == 4 and self.y == 0:
-            return {(self.x - 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y + 1)}
-        else:
-            return None
 
 
-
-    @staticmethod
-    def display():
-        return 'd'
-
-
-class pawn:
-    x = 0
-    y = 0
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def nextAvailableMoves(self):
-        # 1 Free Movement
-        if 1 < self.x < 5 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x+1, self.y), (self.x, self.y+1)}
-        # 2 Can't Go back
-        elif self.x == 1 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1)}
-        # 3 Can't go left
-        elif 1 < self.x < 5 and self.y == 1:
-            return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1)}
-        # 4 Can't go back or left
-        elif self.x == 1 and self.y == 1:
-            return {(self.x + 1, self.y), (self.x, self.y + 1)}
-        # 5 Can't go forward
-        elif self.x == 5 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x, self.y + 1)}
-        # 6 Can't go right
-        elif 1 < self.x < 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x + 1, self.y)}
-        # 7 Can't go forward or right
-        elif self.x == 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y)}
-        # 8 Can't go forward or Left
-        elif self.x == 5 and self.y == 1:
-            return {(self.x-1, self.y), (self.x, self.y + 1)}
-        # 9 Can't go back or right
-        elif self.x == 1 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x + 1, self.y)}
-        # 10 probably could throw an error
-        else:
-            print("somethings fucky")
-
-    def getCurrentPosition(self):
-        return self.x, self.y
-
-    @staticmethod
-    def display():
-        return 'p'
-
-
-
-print(p.getCurrentPosition())
-print(p.nextAvailableMoves())
 
 
 def minimax(start):
@@ -344,7 +301,7 @@ def minimax(start):
     # print(transpositionTable)
     return result
 
-b = board(None,player=1)
+b = board(None,1,0)
 b.display()
 
 b.movePlayer(0, 2, 0, 1)
