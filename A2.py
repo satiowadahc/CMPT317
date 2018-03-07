@@ -5,10 +5,31 @@
 
 class board:
 
-    def __init__(self,state,player):
+    q = token('queen',None,None)
+
+    d1 = token('dragon',None,None)
+    d2 = token('dragon',None,None)
+    d3 = token('dragon',None,None)
+
+    p1 = token('pawn',None,None)
+    p2 = token('pawn',None,None)
+    p3 = token('pawn',None,None)
+    p4 = token('pawn',None,None)
+    p5 = token('pawn',None,None)
+
+    pawns = list()
+    pawns.append(p1)
+    pawns.append(p2)
+    pawns.append(p3)
+    pawns.append(p4)
+    pawns.append(p5)
+
+
+    def __init__(self,state,player,numMoves):
+
         self.x = 5
         self.y = 5
-
+        self.moves = numMoves
         if state is None:
             self.gameState = dict()
             for r in range(1,5):
@@ -17,22 +38,36 @@ class board:
         else:
             self.gameState = state
             self.whoseTurn = player
+            self.chachedWin = False
+            self.chachedWinner = None
 
-        self.board = [[0 for x in range(self.x)] for y in range(self.y)]
+        self.q = self.gameState.q
 
-        self.Q = queen(0, 2)
+        self.d1 = self.gameState.d1
+        self.d2 = self.gameState.d2
+        self.d3 = self.gameState.d3
 
-        self.D1 = dragon(1, 1)
-        self.D2 = dragon(1, 2)
-        self.D3 = dragon(1, 3)
+        self.p1 = self.gameState.p1
+        self.p2 = self.gameState.p2
+        self.p3 = self.gameState.p3
+        self.p4 = self.gameState.p4
+        self.p5 = self.gameState.p5
 
-        self.P1 = pawn(4, 0)
-        self.P2 = pawn(4, 1)
-        self.P3 = pawn(4, 2)
-        self.P4 = pawn(4, 3)
-        self.P5 = pawn(4, 4)
+        #self.board = [[0 for x in range(self.x)] for y in range(self.y)]
 
-        self.updateBoard()
+        # self.Q = queen(0, 2)
+        #
+        # self.D1 = dragon(1, 1)
+        # self.D2 = dragon(1, 2)
+        # self.D3 = dragon(1, 3)
+        #
+        # self.P1 = pawn(4, 0)
+        # self.P2 = pawn(4, 1)
+        # self.P3 = pawn(4, 2)
+        # self.P4 = pawn(4, 3)
+        # self.P5 = pawn(4, 4)
+
+        #self.updateBoard()
 
     # resets board to built in variables
     # does not move players
@@ -87,7 +122,17 @@ class board:
     # Find the successor nodes
     def successors(self):
         global tree
-        nodes  = [board(s) for s in tree]
+        nodes  = [board(s,) for s in tree]
+
+    def isTerminal(self):
+        return self.winFor(0) or self.winFor(1) or self.moves == 50
+
+    def winFor(self,player):
+        if self.chachedWin is False:
+            if player == 0:
+                if self.q.y == 4:
+                    return True
+                elif
 
     # Used for switching player
     def togglePlayer(self,p):
@@ -215,6 +260,58 @@ class token:
 
 
 
+    @staticmethod
+    def display():
+        return 'd'
+
+
+class pawn:
+    x = 0
+    y = 0
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def nextAvailableMoves(self):
+        # 1 Free Movement
+        if 1 < self.x < 5 and 1 < self.y < 5:
+            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x+1, self.y), (self.x, self.y+1)}
+        # 2 Can't Go back
+        elif self.x == 1 and 1 < self.y < 5:
+            return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1)}
+        # 3 Can't go left
+        elif 1 < self.x < 5 and self.y == 1:
+            return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1)}
+        # 4 Can't go back or left
+        elif self.x == 1 and self.y == 1:
+            return {(self.x + 1, self.y), (self.x, self.y + 1)}
+        # 5 Can't go forward
+        elif self.x == 5 and 1 < self.y < 5:
+            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x, self.y + 1)}
+        # 6 Can't go right
+        elif 1 < self.x < 5 and self.y == 5:
+            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x + 1, self.y)}
+        # 7 Can't go forward or right
+        elif self.x == 5 and self.y == 5:
+            return {(self.x, self.y - 1), (self.x-1, self.y)}
+        # 8 Can't go forward or Left
+        elif self.x == 5 and self.y == 1:
+            return {(self.x-1, self.y), (self.x, self.y + 1)}
+        # 9 Can't go back or right
+        elif self.x == 1 and self.y == 5:
+            return {(self.x, self.y - 1), (self.x + 1, self.y)}
+        # 10 probably could throw an error
+        else:
+            print("somethings fucky")
+
+    def getCurrentPosition(self):
+        return self.x, self.y
+
+    @staticmethod
+    def display():
+        return 'p'
+
 
 # Begin unit tests
 p = pawn(1, 2)
@@ -268,3 +365,4 @@ b.display()
 
 b.movePlayer(4, 2, 3, 2)
 b.display()
+
