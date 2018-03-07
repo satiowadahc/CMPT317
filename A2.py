@@ -5,9 +5,19 @@
 
 class board:
 
-    def __init__(self):
+
+    def __init__(self,state,player):
         self.x = 5
         self.y = 5
+
+        if state is None:
+            self.gameState = dict()
+            for r in range(1,5):
+                for c in range(1,5):
+                    self.gameState[r,c] = None
+        else:
+            self.gameState = state
+            self.whoseTurn = player
 
         self.board = [[0 for x in range(self.x)] for y in range(self.y)]
 
@@ -68,6 +78,24 @@ class board:
 
     def isPlayer(self, x, y):
         return self.isDragon(x, y) or self.isPawn(x, y) or self.isQueen(x, y)
+
+    def isMinNode(self):
+        return self.whoseTurn == 0
+
+    def isMaxNode(self):
+        return self.whoseTurn == 1
+
+    # Find the successor nodes
+    def successors(self):
+        global tree
+        nodes  = [board(s) for s in tree]
+
+    # Used for switching player
+    def togglePlayer(self,p):
+        if p == 0:
+            return 1
+        else:
+            return 0
 
     # TODO Cross check with available moves
     def movePlayer(self, x1, y1, x2, y2):
@@ -322,7 +350,8 @@ def minimax(start):
     result = do_minimax(start)
     # print(transpositionTable)
     return result
-b = board()
+
+b = board(None,player=1)
 b.display()
 
 b.movePlayer(0, 2, 0, 1)
