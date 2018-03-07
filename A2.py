@@ -145,6 +145,7 @@ class board:
         gs[where] = who
         return gs
 
+
 class token:
 
     def __init__(self, type, x, y):
@@ -174,50 +175,48 @@ class token:
     # @param foe - type token
     def nextAvailableMoves(self):
         # 1 Free Movement
-        if 1 < self.x < 5 and 1 < self.y < 5:
+        if 0 < self.x < 4 and 0 < self.y < 4:
             return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
                     (self.x - 1, self.y - 1), (self.x - 1, self.y + 1),
                     (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
-        # 2 Can't Go back
-        elif self.x == 0 and 1 < self.y < 5:
+        # 2 Can't Go NegX
+        elif self.x == 0 and 1 < self.y < 4:
             return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1),
                     (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
-        # 5 Can't go forward
-        elif self.x == 5 and 1 < self.y < 5:
+        # 3 Can't go PosX
+        elif self.x == 4 and 0 < self.y < 4:
             return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x, self.y + 1),
                     (self.x - 1, self.y - 1), (self.x - 1, self.y + 1)}
-        # 3 Can't go left
-        elif 1 < self.x < 5 and self.y == 1:
+        # 4 Can't go NegY
+        elif 0 < self.x < 4 and self.y == 0:
             return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
                     (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)}
-        # 6 Can't go right
-        elif 1 < self.x < 5 and self.y == 5:
+        # 5 Can't go PosY
+        elif 0 < self.x < 4 and self.y == 4:
             return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y),
                     (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)}
-        # 4 Can't go back or left
-        elif self.x == 1 and self.y == 1:
+        # 6 Can't go NegX or NegY
+        elif self.x == 0 and self.y == 0:
             return {(self.x + 1, self.y), (self.x, self.y + 1),
                     (self.x + 1, self.y + 1)}
-        # 7 Can't go forward or right
-        elif self.x == 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x - 1, self.y),
-                    (self.x - 1, self.y - 1)}
-        # 8 Can't go forward or Left
-        elif self.x == 5 and self.y == 1:
-            return {(self.x - 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y + 1)}
-        # 9 Can't go back or right
-        elif self.x == 1 and self.y == 5:
+        # 7 Can't go NegX or PosY
+        elif self.x == 0 and self.y == 4:
             return {(self.x, self.y - 1), (self.x + 1, self.y),
                     (self.x + 1, self.y - 1)}
+        # 8 Can't go PosX or PosY
+        elif self.x == 4 and self.y == 4:
+            return {(self.x, self.y - 1), (self.x - 1, self.y),
+                    (self.x - 1, self.y - 1)}
+        # 9 Can't go PosX or NegY
+        elif self.x == 4 and self.y == 0:
+            return {(self.x - 1, self.y), (self.x, self.y + 1),
+                    (self.x - 1, self.y + 1)}
         else:
-            print("Somethings fucky")
+            return None
 
 
 
 
-# Begin unit tests
-p = pawn(1, 2)
 
 print(p.getCurrentPosition())
 print(p.nextAvailableMoves())
