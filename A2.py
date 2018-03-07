@@ -5,7 +5,6 @@
 
 class board:
 
-
     def __init__(self,state,player):
         self.x = 5
         self.y = 5
@@ -146,48 +145,66 @@ class board:
         gs[where] = who
         return gs
 
+class token:
 
-class queen:
-    x = 0
-    y = 0
-
-    def __init__(self, x, y):
+    def __init__(self, type, x, y):
+        self.type = type
         self.x = x
         self.y = y
+        self.alive = True
 
+    def isDragon(self):
+        return self.type == 'dragon'
+
+    def isQueen(self):
+        return self.type == 'queen'
+
+    def isPawn(self):
+        return self.type == 'pawn'
+
+    # @param foe - type token
+    def isEnemy(self, foe):
+        if self.isPawn():
+            return foe.isPawn()
+        elif self.isDragon() or self.isQueen():
+            return foe.isDragon();
+        else:
+            print('ERROR not a valid type')
+
+    # @param foe - type token
     def nextAvailableMoves(self):
         # 1 Free Movement
         if 1 < self.x < 5 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x+1, self.y), (self.x, self.y+1),
+            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
                     (self.x - 1, self.y - 1), (self.x - 1, self.y + 1),
                     (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
         # 2 Can't Go back
-        elif self.x == 1 and 1 < self.y < 5:
+        elif self.x == 0 and 1 < self.y < 5:
             return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1),
                     (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
+        # 5 Can't go forward
+        elif self.x == 5 and 1 < self.y < 5:
+            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x, self.y + 1),
+                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1)}
         # 3 Can't go left
         elif 1 < self.x < 5 and self.y == 1:
             return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
                     (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)}
+        # 6 Can't go right
+        elif 1 < self.x < 5 and self.y == 5:
+            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y),
+                    (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)}
         # 4 Can't go back or left
         elif self.x == 1 and self.y == 1:
             return {(self.x + 1, self.y), (self.x, self.y + 1),
                     (self.x + 1, self.y + 1)}
-        # 5 Can't go forward
-        elif self.x == 5 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1)}
-        # 6 Can't go right
-        elif 1 < self.x < 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x + 1, self.y),
-                    (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)}
         # 7 Can't go forward or right
         elif self.x == 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y),
+            return {(self.x, self.y - 1), (self.x - 1, self.y),
                     (self.x - 1, self.y - 1)}
         # 8 Can't go forward or Left
         elif self.x == 5 and self.y == 1:
-            return {(self.x-1, self.y), (self.x, self.y + 1),
+            return {(self.x - 1, self.y), (self.x, self.y + 1),
                     (self.x - 1, self.y + 1)}
         # 9 Can't go back or right
         elif self.x == 1 and self.y == 5:
@@ -196,127 +213,7 @@ class queen:
         else:
             print("Somethings fucky")
 
-    def getCurrentPosition(self):
-        return self.x, self.y
 
-    @staticmethod
-    def display():
-        return 'q'
-
-
-class dragon:
-    x = 0
-    y = 0
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def nextAvailableMoves(self):
-        # 1 Free Movement
-        if 1 < self.x < 5 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x+1, self.y), (self.x, self.y+1),
-                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1),
-                    (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
-        # 2 Can't Go back
-        elif self.x == 1 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
-        # 3 Can't go left
-        elif 1 < self.x < 5 and self.y == 1:
-            return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)}
-        # 4 Can't go back or left
-        elif self.x == 1 and self.y == 1:
-            return {(self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x + 1, self.y + 1)}
-        # 5 Can't go forward
-        elif self.x == 5 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1)}
-        # 6 Can't go right
-        elif 1 < self.x < 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x + 1, self.y),
-                    (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)}
-        # 7 Can't go forward or right
-        elif self.x == 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y),
-                    (self.x - 1, self.y - 1)}
-        # 8 Can't go forward or Left
-        elif self.x == 5 and self.y == 1:
-            return {(self.x-1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y + 1)}
-        # 9 Can't go back or right
-        elif self.x == 1 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x + 1, self.y),
-                    (self.x + 1, self.y - 1)}
-        else:
-            print("Somethings fucky")
-
-    def getCurrentPosition(self):
-        return self.x, self.y
-
-    @staticmethod
-    def display():
-        return 'd'
-
-
-class pawn:
-    x = 0
-    y = 0
-
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def nextAvailableMoves(self):
-        # 1 Free Movement
-        if 1 < self.x < 5 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x+1, self.y), (self.x, self.y+1)}
-        # 2 Can't Go back
-        elif self.x == 1 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1)}
-        # 3 Can't go left
-        elif 1 < self.x < 5 and self.y == 1:
-            return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1)}
-        # 4 Can't go back or left
-        elif self.x == 1 and self.y == 1:
-            return {(self.x + 1, self.y), (self.x, self.y + 1)}
-        # 5 Can't go forward
-        elif self.x == 5 and 1 < self.y < 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x, self.y + 1)}
-        # 6 Can't go right
-        elif 1 < self.x < 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y), (self.x + 1, self.y)}
-        # 7 Can't go forward or right
-        elif self.x == 5 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x-1, self.y)}
-        # 8 Can't go forward or Left
-        elif self.x == 5 and self.y == 1:
-            return {(self.x-1, self.y), (self.x, self.y + 1)}
-        # 9 Can't go back or right
-        elif self.x == 1 and self.y == 5:
-            return {(self.x, self.y - 1), (self.x + 1, self.y)}
-        # 10 probably could throw an error
-        else:
-            print("somethings fucky")
-
-    def getCurrentPosition(self):
-        return self.x, self.y
-
-    @staticmethod
-    def display():
-        return 'p'
-
-# class search:
-#
-# class searchNodes:
-#
-# class problemState:
-#
-# class problem:
-#     def __init__(self):
-#         Board board = Board.__init__()
 
 
 # Begin unit tests
