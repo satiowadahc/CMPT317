@@ -315,25 +315,22 @@ class board:
         else:
             return False
 
-    def occupied(self, position):
-
-        return self.board[position[0]][position[1]] != " "
 
     def attack(self, attacker, defender):
+
         if attacker.isPawn():
             if self.isDiagonalMove(attacker, defender) and not defender.isPawn():
-                if self.occupied(defender):
+                if self.isPlayer(defender):
                     return True
                 else:
                     return False
         elif attacker.isQueen() or attacker.isDragon():
-                if not (attacker.isQueen() or attacker.isDragon()):
-                    if self.occupied(defender):
-                        return True
-                    else:
-                        return False
+            if defender.isPawn():
+                if self.isPlayer(defender):
+                    return True
+                else:
+                    return False
         else:
-            print(attacker)
             return 'hi'
 
     def display(self):
@@ -407,5 +404,6 @@ b.makeMove(s2, s3)
 b.display()
 b.makeMove(s3, s4)
 b.display()
-
+b.makeMove(s4, s3)
+b.display()
 
