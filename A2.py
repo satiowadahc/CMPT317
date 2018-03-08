@@ -1,6 +1,6 @@
 # Assignment 2
 # CMPT 317
-# Chad A. Woitas and Brandon Bachinyski
+# Chad A. Woitas and Brandon Bachynski
 import time as time
 import numpy as np
 from copy import deepcopy
@@ -114,7 +114,7 @@ class board:
         self.x = 5
         self.y = 5
 
-        self.board = [["" for i in range(5)] for j in range(5)]
+        self.board = [[" " for i in range(5)] for j in range(5)]
 
         # if state is None:
         #     self.board = dict()
@@ -126,6 +126,25 @@ class board:
         #     self.whoseTurn = player
         #     self.cachedWin = False
         #     self.cachedWinner = None
+
+        self.whoseTurn = 1
+        self.cachedWin = False
+        self.cachedWinner = None
+
+        self.initialBoard()
+
+    def initialBoard(self):
+
+        self.board[0][2] = self.q
+        self.board[1][1] = self.d1
+        self.board[1][2] = self.d2
+        self.board[1][3] = self.d3
+
+        self.board[0][4] = self.p1
+        self.board[1][4] = self.p2
+        self.board[2][4] = self.p3
+        self.board[3][4] = self.p4
+        self.board[4][4] = self.p5
 
     @staticmethod
     def isPlayer(thing):
@@ -306,11 +325,6 @@ class board:
                 #     print(self.board[i][j], end='')
             print('')
 
-    def move(self, thing, where):
-
-        gs = self.board.copy()
-        gs[where] = thing
-        return (where, thing), gs
 
 
 def minimax(start):
@@ -358,5 +372,8 @@ d = token('dragon', 0, 0)
 # print(d.isEnemy(p))
 # print(p.nextAvailableMoves())
 
-initState = [["" for i in range(5)] for j in range(5)]
 b = board()
+
+b.display()
+
+
