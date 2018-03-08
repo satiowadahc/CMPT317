@@ -3,6 +3,7 @@
 # Chad A. Woitas
 import time as time
 import numpy as np
+from copy import deepcopy
 
 class token:
 
@@ -95,6 +96,11 @@ class board:
     p4 = token('pawn', None, None)
     p5 = token('pawn', None, None)
 
+    dragons = list()
+    dragons.append(d1)
+    dragons.append(d2)
+    dragons.append(d3)
+
     pawns = list()
     pawns.append(p1)
     pawns.append(p2)
@@ -107,30 +113,18 @@ class board:
         self.x = 5
         self.y = 5
 
-        if state is None:
-            self.gameState = dict()
-            for r in range(1,5):
-                for c in range(1,5):
-                    self.gameState[r,c] = None
-        else:
-            self.gameState = state
-            self.whoseTurn = player
-            self.cachedWin = False
-            self.cachedWinner = None
+        self.board = [["" for i in range(5)] for j in range(5)]
 
-        self.q = self.gameState.q
-
-        self.d1 = self.gameState.d1
-        self.d2 = self.gameState.d2
-        self.d3 = self.gameState.d3
-
-        self.p1 = self.gameState.p1
-        self.p2 = self.gameState.p2
-        self.p3 = self.gameState.p3
-        self.p4 = self.gameState.p4
-        self.p5 = self.gameState.p5
-
-
+        # if state is None:
+        #     self.gameState = dict()
+        #     for r in range(1,5):
+        #         for c in range(1,5):
+        #             self.gameState[r,c] = None
+        # else:
+        #     self.gameState = state
+        #     self.whoseTurn = player
+        #     self.cachedWin = False
+        #     self.cachedWinner = None
 
     @staticmethod
     def isPlayer(thing):
@@ -146,13 +140,21 @@ class board:
         return[v for v in self.gameState if self.gameState[v] == ' ']
 
     # Find the successor nodes
-    def successors(self):
+    def successors(self,player):
+        successor= []
 
-        blanks = self.allBlanks()
-        next = self.togglePlayer(self.whoseTurn)
-        states = map(lambda v: self.move(v,self.whoseTurn),blanks)
-        nodes  = [(m,board(s,next)) for m,s in states]
-        return nodes
+        if player == 0:
+            successor += self.moveAIPlayer(self.q)
+
+            for dragon in self.dragons:
+                successor += self.moveAIPlayer(dragon)
+        else:
+            for pawn in self.pawns:
+                successor += self.moveAIPlayer(pawn)
+
+        return successor
+
+
 
     def isTerminal(self):
         return self.winFor(0) or self.winFor(1)
@@ -195,6 +197,10 @@ class board:
             return 1
         else:
             return 0
+
+    # Heuristic function
+    def h1(self):
+
 
     # Return allowed moves
     def moveAIPlayer(self, thing):
