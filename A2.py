@@ -76,11 +76,13 @@ class token:
 
     def display(self):
         if self.isPawn():
-            print('p')
+            print('p', end='')
         elif self.isDragon():
-            print('d')
+            print('d', end='')
         elif self.isQueen():
-            print('q')
+            print('q', end='')
+        else:
+            print('')
 
 
 class board:
@@ -114,7 +116,7 @@ class board:
         self.x = 5
         self.y = 5
 
-        self.board = [[" " for i in range(5)] for j in range(5)]
+        self.board = [[' ' for i in range(5)] for j in range(5)]
 
         # if state is None:
         #     self.board = dict()
@@ -249,8 +251,8 @@ class board:
     # @params - two locations
     # @return - true if valid move taken
     def makeMove(self, m1, m2):
-        p1 = self.board(m1)
-        p2 = self.board(m2)
+        p1 = self.board[m1[0]][m1[1]]
+        p2 = self.board[m2[0]][m2[1]]
 
         # Check for players existestance
         if not self.isPlayer(p1):
@@ -318,11 +320,10 @@ class board:
         print('')
         for i in range(self.x):
             for j in range(self.y):
-                print(self.board[i][j])
-                # if self.isPlayer(self.board[i][j]):
-                #     print(self.board[i][j], end='')
-                # else:
-                #     print(self.board[i][j], end='')
+                if self.isPlayer(self.board[i][j]):
+                    print(self.board[i][j].display(), end='')
+                else:
+                    print(self.board[i][j], end='')
             print('')
 
 
