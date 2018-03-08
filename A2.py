@@ -177,7 +177,6 @@ class board:
         return successor
 
 
-
     def isTerminal(self):
         return self.winFor(0) or self.winFor(1)
 
@@ -220,7 +219,8 @@ class board:
             return 0
 
     # Heuristic function
-    # def h1(self):
+    #def h1(self, board):
+
 
     # Return allowed moves
     def moveAIPlayer(self, thing):
@@ -314,6 +314,25 @@ class board:
             return True
         else:
             return False
+
+    def occupied(self,position):
+
+        return self.board[position[0]][position[1]] != " "
+
+    def attack(self,attacker,defender):
+        if self.board[attacker[0]][attacker[1]] == 'P':
+            if self.isDiagonalMove(attacker,defender) and self.board[defender[0]][defender[1]] != 'P':
+                if self.occupied(defender):
+                    return True
+                else:
+                    return False
+        else:
+            if self.board[attacker[0]][attacker[1]] == 'Q' or self.board[attacker[0]][attacker[1]] == 'D':
+                if self.isDiagonalMove(attacker,defender) and self.board[attacker[0]][attacker[1]] != 'Q' or self.board[attacker[0]][attacker[1]] != 'D':
+                    if self.occupied(defender):
+                        return True
+                    else:
+                        return False
 
     def display(self):
         print('')
