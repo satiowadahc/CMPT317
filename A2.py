@@ -279,6 +279,7 @@ class board:
             elif self.isDiagonalMove(m1, m2):
                 if enemy == 1:
                     # TODO make kill function
+                    print(self.attack(p1, p2))
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
                     return True
@@ -296,6 +297,7 @@ class board:
                     return True
                 elif enemy == 1:
                     # TODO MAKE KILL function
+                    print(self.attack(p1, p2))
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
                     return True
@@ -313,24 +315,26 @@ class board:
         else:
             return False
 
-    def occupied(self,position):
+    def occupied(self, position):
 
         return self.board[position[0]][position[1]] != " "
 
-    def attack(self,attacker,defender):
-        if self.board[attacker[0]][attacker[1]] == 'P':
-            if self.isDiagonalMove(attacker,defender) and self.board[defender[0]][defender[1]] != 'P':
+    def attack(self, attacker, defender):
+        if attacker.isPawn():
+            if self.isDiagonalMove(attacker, defender) and not defender.isPawn():
                 if self.occupied(defender):
                     return True
                 else:
                     return False
-        else:
-            if self.board[attacker[0]][attacker[1]] == 'Q' or self.board[attacker[0]][attacker[1]] == 'D':
-                if self.isDiagonalMove(attacker,defender) and self.board[attacker[0]][attacker[1]] != 'Q' or self.board[attacker[0]][attacker[1]] != 'D':
+        elif attacker.isQueen() or attacker.isDragon():
+                if not (attacker.isQueen() or attacker.isDragon()):
                     if self.occupied(defender):
                         return True
                     else:
                         return False
+        else:
+            print(attacker)
+            return 'hi'
 
     def display(self):
         print('')
@@ -387,13 +391,21 @@ print('')
 # print(b.nextAvailableMoves())
 # print(b.moveAIPlayer(m))
 # b.makeMove(m, b.moveAIPlayer(m)[1])
-
+# print(b.successors(1))
 # b.display()
 b = board()
 m = (2, 0)
 b.display()
+s1 = (1, 1)
+s2 = (1, 2)
+s3 = (1, 3)
+s4 = (1, 4)
 
-print(b.successors(1))
+b.makeMove(s1, s2)
+b.display()
+b.makeMove(s2, s3)
+b.display()
+b.makeMove(s3, s4)
 b.display()
 
 
