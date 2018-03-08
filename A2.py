@@ -5,8 +5,8 @@
 
 class token:
 
-    def __init__(self, type, x, y):
-        self.type = type
+    def __init__(self, thing, x, y):
+        self.type = thing
         self.x = x
         self.y = y
         self.alive = True
@@ -25,7 +25,7 @@ class token:
         if self.isPawn():
             return foe.isPawn()
         elif self.isDragon() or self.isQueen():
-            return foe.isDragon();
+            return foe.isDragon()
         else:
             print('ERROR not a valid type')
 
@@ -71,24 +71,28 @@ class token:
         else:
             return None
 
+    def display(self):
+        if self.isPawn():
+            print('p')
+        elif self.isDragon():
+            print('d')
+        elif self.isQueen():
+            print('q')
 
 
-    @staticmethod
-    def display():
-        return 'd'
 class board:
 
-    q = token('queen',None,None)
+    q = token('queen', None, None)
 
-    d1 = token('dragon',None,None)
-    d2 = token('dragon',None,None)
-    d3 = token('dragon',None,None)
+    d1 = token('dragon', None, None)
+    d2 = token('dragon', None, None)
+    d3 = token('dragon', None, None)
 
-    p1 = token('pawn',None,None)
-    p2 = token('pawn',None,None)
-    p3 = token('pawn',None,None)
-    p4 = token('pawn',None,None)
-    p5 = token('pawn',None,None)
+    p1 = token('pawn', None, None)
+    p2 = token('pawn', None, None)
+    p3 = token('pawn', None, None)
+    p4 = token('pawn', None, None)
+    p5 = token('pawn', None, None)
 
     pawns = list()
     pawns.append(p1)
@@ -97,8 +101,7 @@ class board:
     pawns.append(p4)
     pawns.append(p5)
 
-
-    def __init__(self,state,player,numMoves):
+    def __init__(self, state, player, numMoves):
 
         self.x = 5
         self.y = 5
@@ -126,57 +129,11 @@ class board:
         self.p4 = self.gameState.p4
         self.p5 = self.gameState.p5
 
-        #self.board = [[0 for x in range(self.x)] for y in range(self.y)]
-
-        # self.Q = queen(0, 2)
-        #
-        # self.D1 = dragon(1, 1)
-        # self.D2 = dragon(1, 2)
-        # self.D3 = dragon(1, 3)
-        #
-        # self.P1 = pawn(4, 0)
-        # self.P2 = pawn(4, 1)
-        # self.P3 = pawn(4, 2)
-        # self.P4 = pawn(4, 3)
-        # self.P5 = pawn(4, 4)
-
-        #self.updateBoard()
-
-    # resets board to built in variables
-    # does not move players
-    def updateBoard(self):
-        self.board = [[0 for x in range(self.x)] for y in range(self.y)]
-        (m, n) = self.Q.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.Q
-        (m, n) = self.D1.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.D1
-        (m, n) = self.D2.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.D2
-        (m, n) = self.D3.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.D3
-        (m, n) = self.P1.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.P1
-        (m, n) = self.P2.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.P2
-        (m, n) = self.P3.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.P3
-        (m, n) = self.P4.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.P4
-        (m, n) = self.P5.getCurrentPosition()
-        if isinstance(self.board[m][n], int):
-            self.board[m][n] = self.P5
 
 
-    def isPlayer(self, x, y):
-        return self.isDragon(x, y) or self.isPawn(x, y) or self.isQueen(x, y)
+    @staticmethod
+    def isPlayer(thing):
+        return isinstance(thing, token)
 
     def isMinNode(self):
         return self.whoseTurn == 0
@@ -192,7 +149,7 @@ class board:
     def isTerminal(self):
         return self.winFor(0) or self.winFor(1) or self.moves == 50
 
-    def winFor(self,player):
+    def winFor(self, player):
         if self.chachedWin is False:
             if player == 0:
                 if self.q.y == 4:
@@ -216,44 +173,44 @@ class board:
             return player == self.chachedWinner
 
     # Used for switching player
-    def togglePlayer(self,p):
+    def togglePlayer(self, p):
         if p == 0:
             return 1
         else:
             return 0
 
-    # TODO Cross check with available moves
-    def movePlayer(self, x1, y1, x2, y2):
-        # Player Good and empty square
-        if self.isPlayer(x1, y1) and not self.isPlayer(x2, y2):
-            self.board[x2][y2] = self.board[x1][y1]
-            self.board[x1][y1] = 0
-        elif self.isPawn(x1, y1) and self.isPawn(x2, y2):
-            print("Friendly Fire")
-        elif self.isPawn(x1, y1) and self.isDragon(x2, y2):
-            self.board[x2][y2] = self.board[x1][y1]
-            self.board[x1][y1] = 0
-            # Kill Dragon
-        elif self.isPawn(x1, y1) and self.isQueen(x2, y2):
-            self.board[x2][y2] = self.board[x1][y1]
-            self.board[x1][y1] = 0
-            print('Winner Winner')
-        elif self.isDragon(x1, y1) and self.isDragon(x2, y2):
-            print('Friendly fire')
-        elif self.isDragon(x1, y1) and self.isQueen(x2, y2):
-            print('Friendly Fire')
-        elif self.isDragon(x1, y1) and self.isPawn(x2, y2):
-            self.board[x2][y2] = self.board[x1][y1]
-            self.board[x1][y1] = 0
-            # Kill Pawn
-        elif self.isQueen(x1, y1) and self.isDragon(x2, y2):
-            print('Friendly Fire')
-        elif self.isQueen(x1, y1) and self.isPawn(x2, y2):
-            self.board[x2][y2] = self.board[x1][y1]
-            self.board[x1][y1] = 0
-            # Kill Pawn
+    # Return allowed moves
+    def moveAIPlayer(self, thing):
+        moves = thing.nextAvailableMoves
+        nextMove = []
+
+        if thing.isQueen() or thing.isDragon():
+            for i in moves:
+                gs = self.gameState[i[0]][i[1]]
+                if self.isPlayer(gs):
+                    if thing.isEnemy(gs):
+                        nextMove.append(i)
+                else:
+                    nextMove.append(i[0], i[1])
+            return nextMove
+        elif thing.isPawn():
+            for i in moves:
+                gs = self.gameState[i[0]][i[1]]
+                if self.isDiagonalMove(thing.getCurrentLocaiton,i):
+                    if thing.isEnemy(gs):
+                        nextMove.append(i)
+                else:
+                    if not thing.isEnemy(gs):
+                        nextMove.append(i)
+            return nextMove
+
+
+    @staticmethod
+    def isDiagonalMove(m1, m2):
+        if (abs(m1[0]-m2[0]) == 1) and (abs(m1[0]-m2[0]) == 1):
+            return True
         else:
-            print("Must not be a player there")
+            return False
 
     def display(self):
         print('')
@@ -300,4 +257,5 @@ def minimax(start):
     result = do_minimax(start)
     # print(transpositionTable)
     return result
+
 
