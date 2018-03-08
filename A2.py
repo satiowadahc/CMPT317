@@ -205,6 +205,78 @@ class board:
             return nextMove
 
 
+    def makeMove(self, m1, m2):
+        p1 = self.gameState(m1)
+        p2 = self.gameState(m2)
+        if not self.isPlayer(p1):
+            return False
+        if self.isPlayer(p2):
+            if p1.isEnemy(p2):
+                # Enemy
+                enemy = 1
+            else:
+                # Friendly
+                enemy = 0
+        else:
+            # Blank
+            enemy = 2
+
+        if p1.isPawn():
+            # Check if move is 1 square in Straight line
+            if ((abs(m1[0] - m2[0]) == 1) and not (abs(m1[1] - m2[1]) == 1)) or \
+                    (not (abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 1)):
+                if enemy == 2:
+                    self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
+                    self.gameState[m1[0]][m1[1]] = ''
+                    return True
+                else:
+                    return False
+            elif self.isDiagonalMove(m1,m2):
+                if enemy == 1:
+                    # TODO make kill function
+                    self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
+                    self.gameState[m1[0]][m1[1]] = ''
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        elif p1.isQueen() or p1.isDragon():
+            # Check for not moving
+            if (abs(m1[0] - m2[0]) <= 1) and (abs(m1[1] - m2[1]) <= 1):
+                if enemy == 2:
+                    self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
+                    self.gameState[m1[0]][m1[1]] = ''
+                    return True
+                elif enemy == 1:
+                    # TODO MAKE KILL function
+                    self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
+                    self.gameState[m1[0]][m1[1]] = ''
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+
+
+
+        elif
+        # elif p1.isPawn():
+        #     if (abs(m1[0]-m2[0]) <= 1) or (abs(m1[1]-m2[1]) <= 1):
+        #         if p1.isEnemy(p2):
+        #             if self.isDiagonalMove(m1, m2):
+        #                 p2.alive = False
+        #                 self.gameState[m2[0]][m2[1]] = p1
+        #                 self.gameState[m1[0]][m1[1]] = ' '
+        #         else:
+        #             p1.x = m2[0]
+        #             p2.y = m2[1]
+        # elif p1.isDragon() or p1.isQueen():
+        #     if (abs(m1[0] - m2[0]) <= 1) or (abs(m1[1] - m2[1]) <= 1):
+        #         if self.isPlayer(p2)
+        #
     @staticmethod
     def isDiagonalMove(m1, m2):
         if (abs(m1[0]-m2[0]) == 1) and (abs(m1[0]-m2[0]) == 1):
@@ -259,3 +331,22 @@ def minimax(start):
     return result
 
 
+# Begin Testing Below -------------------------------
+
+state = [[0 for i in range(5)] for j in range(5)]
+
+for i in range(5):
+    state[i][4] = token('pawn', i, 4)
+state[2][0] = token('queen', 2, 0)
+state[1][1] = token('dragon', 1, 1)
+state[2][1] = token('dragon', 2, 1)
+state[3][1] = token('dragon', 3, 1)
+
+# b = board(state, 0, 0)
+
+p = token('pawn', 0, 0)
+print(p.isQueen())
+print(p.isDragon())
+print(p.isPawn())
+p.display()
+print(p.alive)
