@@ -8,11 +8,21 @@ from copy import deepcopy
 
 class token:
 
-    def __init__(self, thing, x, y):
+    def __init__(self, thing):
         self.type = thing
-        self.x = x
-        self.y = y
+        self.x = 0
+        self.y = 0
         self.alive = True
+
+    def __str__(self):
+        if self.type == 'dragon':
+            return 'D'
+        elif self.type == 'queen':
+            return 'Q'
+        elif self.type == 'pawn':
+            return 'P'
+        else:
+            return '0'
 
     def isDragon(self):
         return self.type == 'dragon'
@@ -74,30 +84,20 @@ class token:
         else:
             return None
 
-    def display(self):
-        if self.isPawn():
-            print('p', end='')
-        elif self.isDragon():
-            print('d', end='')
-        elif self.isQueen():
-            print('q', end='')
-        else:
-            print('')
-
 
 class board:
 
-    q = token('queen', None, None)
+    q = token('queen')
 
-    d1 = token('dragon', None, None)
-    d2 = token('dragon', None, None)
-    d3 = token('dragon', None, None)
+    d1 = token('dragon')
+    d2 = token('dragon')
+    d3 = token('dragon')
 
-    p1 = token('pawn', None, None)
-    p2 = token('pawn', None, None)
-    p3 = token('pawn', None, None)
-    p4 = token('pawn', None, None)
-    p5 = token('pawn', None, None)
+    p1 = token('pawn')
+    p2 = token('pawn')
+    p3 = token('pawn')
+    p4 = token('pawn')
+    p5 = token('pawn')
 
     dragons = list()
     dragons.append(d1)
@@ -116,7 +116,7 @@ class board:
         self.x = 5
         self.y = 5
 
-        self.board = [[' ' for i in range(5)] for j in range(5)]
+        self.board = [[0 for i in range(5)] for j in range(5)]
 
         # if state is None:
         #     self.board = dict()
@@ -137,10 +137,10 @@ class board:
 
     def initialBoard(self):
 
-        self.board[0][2] = self.q
+        self.board[2][0] = self.q
         self.board[1][1] = self.d1
-        self.board[1][2] = self.d2
-        self.board[1][3] = self.d3
+        self.board[2][1] = self.d2
+        self.board[3][1] = self.d3
 
         self.board[0][4] = self.p1
         self.board[1][4] = self.p2
@@ -162,7 +162,7 @@ class board:
         return[v for v in self.board if self.board[v] == ' ']
 
     # Find the successor nodes
-    def successors(self,player):
+    def successors(self, player):
         successor = []
 
         if player == 0:
@@ -189,8 +189,7 @@ class board:
         else:
             return 0
 
-
-    def winFor(self,player):
+    def winFor(self, player):
         if self.cachedWin is False:
             if player == 0:
                 if self.q.y == 4:
@@ -318,14 +317,10 @@ class board:
 
     def display(self):
         print('')
-        for i in range(self.x):
-            for j in range(self.y):
-                if self.isPlayer(self.board[i][j]):
-                    print(self.board[i][j].display(), end='')
-                else:
-                    print(self.board[i][j], end='')
+        for i in range(self.y):
+            for j in range(self.x):
+                    print(self.board[j][i], end='')
             print('')
-
 
 
 def minimax(start):
@@ -355,10 +350,11 @@ def minimax(start):
 
 
 # Begin Testing Below -------------------------------
-p = token('pawn', 0, 0)
-q = token('queen', 0, 0)
-d = token('dragon', 0, 0)
+p = token('pawn')
+q = token('queen')
+d = token('dragon')
 
+print('')
 # Completed Tests
 # print(p.isPawn())
 # print(p.isQueen())
@@ -373,7 +369,9 @@ d = token('dragon', 0, 0)
 # print(d.isEnemy(p))
 # print(p.nextAvailableMoves())
 
+# b.display()
 b = board()
+
 
 b.display()
 
