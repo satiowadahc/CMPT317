@@ -35,54 +35,13 @@ class token:
 
     # @param foe - type token
     def isEnemy(self, foe):
-        if self.isPawn():
-            return foe.isDragon() or foe.isQueen()
-        elif self.isDragon() or self.isQueen():
-            return foe.isPawn()
-        else:
-            print('ERROR not a valid type')
-
-    # @param foe - type token
-    def nextAvailableMoves(self):
-        # 1 Free Movement
-        if 0 < self.x < 4 and 0 < self.y < 4:
-            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1),
-                    (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
-        # 2 Can't Go NegX
-        elif self.x == 0 and 1 < self.y < 4:
-            return {(self.x, self.y - 1), (self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x + 1, self.y - 1), (self.x + 1, self.y + 1)}
-        # 3 Can't go PosX
-        elif self.x == 4 and 0 < self.y < 4:
-            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y - 1), (self.x - 1, self.y + 1)}
-        # 4 Can't go NegY
-        elif 0 < self.x < 4 and self.y == 0:
-            return {(self.x - 1, self.y), (self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y + 1), (self.x + 1, self.y + 1)}
-        # 5 Can't go PosY
-        elif 0 < self.x < 4 and self.y == 4:
-            return {(self.x, self.y - 1), (self.x - 1, self.y), (self.x + 1, self.y),
-                    (self.x - 1, self.y - 1), (self.x + 1, self.y - 1)}
-        # 6 Can't go NegX or NegY
-        elif self.x == 0 and self.y == 0:
-            return {(self.x + 1, self.y), (self.x, self.y + 1),
-                    (self.x + 1, self.y + 1)}
-        # 7 Can't go NegX or PosY
-        elif self.x == 0 and self.y == 4:
-            return {(self.x, self.y - 1), (self.x + 1, self.y),
-                    (self.x + 1, self.y - 1)}
-        # 8 Can't go PosX or PosY
-        elif self.x == 4 and self.y == 4:
-            return {(self.x, self.y - 1), (self.x - 1, self.y),
-                    (self.x - 1, self.y - 1)}
-        # 9 Can't go PosX or NegY
-        elif self.x == 4 and self.y == 0:
-            return {(self.x - 1, self.y), (self.x, self.y + 1),
-                    (self.x - 1, self.y + 1)}
-        else:
-            return None
+        if isinstance(foe, token):
+            if self.isPawn():
+                return foe.isDragon() or foe.isQueen()
+            elif self.isDragon() or self.isQueen():
+                return foe.isPawn()
+            else:
+                print('ERROR not a valid type')
 
 
 class board:
@@ -165,15 +124,20 @@ class board:
     def successors(self, player):
         successor = []
 
-        if player == 0:
-            successor += self.moveAIPlayer(self.q)
-
-            for dragon in self.dragons:
-                successor += self.moveAIPlayer(dragon)
+        if player == 1:
+            for i in range(self.y):
+                for j in range(self.x):
+                    if isinstance(self.board[j][i], token):
+                        if self.board[j][i].isPawn():
+                            m1 = (j, i)
+                            successor.append(self.moveAIPlayer(m1))
         else:
-            for pawn in self.pawns:
-                successor += self.moveAIPlayer(pawn)
-
+            for i in range(self.y):
+                for j in range(self.x):
+                    if isinstance(self.board[j][i], token):
+                        if self.board[j][i].isDragon() or self.board[j][i].isQueen():
+                            m1 = (j, i)
+                            successor.append(self.moveAIPlayer(m1))
         return successor
 
 
@@ -222,11 +186,45 @@ class board:
     #def h1(self, board):
 
 
-    # Return allowed moves
-    def moveAIPlayer(self, thing):
-        moves = thing.nextAvailableMoves
-        nextMove = []
+    def nextAvailableMoves(self, m):
+        x1 = m[0]
+        y1 = m[1]
+        # 1 Free Movement
+        if 0 < x1 < 4 and 0 < y1 < 4:
+            return {(x1, y1 - 1), (x1 - 1, y1), (x1 + 1, y1), (x1, y1 + 1),
+                    (x1 - 1, y1 - 1), (x1 - 1, y1 + 1), (x1 + 1, y1 - 1), (x1 + 1, y1 + 1)}
+        # 2 Can't Go NegX
+        elif x1 == 0 and 1 < y1 < 4:
+            return {(x1, y1 - 1), (x1 + 1, y1), (x1, y1 + 1), (x1 + 1, y1 - 1), (x1 + 1, y1 + 1)}
+        # 3 Can't go PosX
+        elif x1 == 4 and 0 < y1 < 4:
+            return {(x1, y1 - 1), (x1 - 1, y1), (x1, y1 + 1), (x1 - 1, y1 - 1), (x1 - 1, y1 + 1)}
+        # 4 Can't go NegY
+        elif 0 < x1 < 4 and y1 == 0:
+            return {(x1 - 1, y1), (x1 + 1, y1), (x1, y1 + 1), (x1 - 1, y1 + 1), (x1 + 1, y1 + 1)}
+        # 5 Can't go PosY
+        elif 0 < x1 < 4 and y1 == 4:
+            return {(x1, y1 - 1), (x1 - 1, y1), (x1 + 1, y1), (x1 - 1, y1 - 1), (x1 + 1, y1 - 1)}
+        # 6 Can't go NegX or NegY
+        elif x1 == 0 and y1 == 0:
+            return {(x1 + 1, y1), (x1, y1 + 1), (x1 + 1, y1 + 1)}
+        # 7 Can't go NegX or PosY
+        elif x1 == 0 and y1 == 4:
+            return {(x1, y1 - 1), (x1 + 1, y1), (x1 + 1, y1 - 1)}
+        # 8 Can't go PosX or PosY
+        elif x1 == 4 and y1 == 4:
+            return {(x1, y1 - 1), (x1 - 1, y1), (x1 - 1, y1 - 1)}
+        # 9 Can't go PosX or NegY
+        elif x1 == 4 and y1 == 0:
+            return {(x1 - 1, y1), (x1, y1 + 1), (x1 - 1, y1 + 1)}
+        else:
+            return {()}
 
+    # Return allowed moves
+    def moveAIPlayer(self, m1):
+        moves = self.nextAvailableMoves(m1)
+        thing = self.board[m1[0]][m1[1]]
+        nextMove = []
         if thing.isQueen() or thing.isDragon():
             for i in moves:
                 gs = self.board[i[0]][i[1]]
@@ -239,7 +237,7 @@ class board:
         elif thing.isPawn():
             for i in moves:
                 gs = self.board[i[0]][i[1]]
-                if self.isDiagonalMove(thing.getCurrentLocaiton,i):
+                if self.isDiagonalMove(m1, i):
                     if thing.isEnemy(gs):
                         nextMove.append(i)
                 else:
@@ -274,7 +272,7 @@ class board:
                     (not (abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 1)):
                 if enemy == 2:
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
-                    self.board[m1[0]][m1[1]] = ''
+                    self.board[m1[0]][m1[1]] = 0
                     return True
                 else:
                     return False
@@ -282,7 +280,7 @@ class board:
                 if enemy == 1:
                     # TODO make kill function
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
-                    self.board[m1[0]][m1[1]] = ''
+                    self.board[m1[0]][m1[1]] = 0
                     return True
                 else:
                     # Else friendly or not a one step move
@@ -294,12 +292,12 @@ class board:
             if (abs(m1[0] - m2[0]) <= 1) and (abs(m1[1] - m2[1]) <= 1):
                 if enemy == 2:
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
-                    self.board[m1[0]][m1[1]] = ''
+                    self.board[m1[0]][m1[1]] = 0
                     return True
                 elif enemy == 1:
                     # TODO MAKE KILL function
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
-                    self.board[m1[0]][m1[1]] = ''
+                    self.board[m1[0]][m1[1]] = 0
                     return True
                 else:
                     return False
@@ -386,12 +384,16 @@ print('')
 # print(d.isEnemy(q))
 # print(d.isEnemy(d))
 # print(d.isEnemy(p))
-# print(p.nextAvailableMoves())
+# print(b.nextAvailableMoves())
+# print(b.moveAIPlayer(m))
+# b.makeMove(m, b.moveAIPlayer(m)[1])
 
 # b.display()
 b = board()
+m = (2, 0)
+b.display()
 
-
+print(b.successors(1))
 b.display()
 
 
