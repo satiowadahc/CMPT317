@@ -1,7 +1,8 @@
 # Assignment 2
 # CMPT 317
 # Chad A. Woitas
-
+import time as time
+import numpy as np
 
 class token:
 
@@ -101,11 +102,11 @@ class board:
     pawns.append(p4)
     pawns.append(p5)
 
-    def __init__(self, state, player, numMoves):
+    def __init__(self, state, player):
 
         self.x = 5
         self.y = 5
-        self.moves = numMoves
+
         if state is None:
             self.gameState = dict()
             for r in range(1,5):
@@ -114,8 +115,8 @@ class board:
         else:
             self.gameState = state
             self.whoseTurn = player
-            self.chachedWin = False
-            self.chachedWinner = None
+            self.cachedWin = False
+            self.cachedWinner = None
 
         self.q = self.gameState.q
 
@@ -141,36 +142,52 @@ class board:
     def isMaxNode(self):
         return self.whoseTurn == 1
 
+    def allBlanks(self):
+        return[v for v in self.gameState if self.gameState[v] == ' ']
+
     # Find the successor nodes
     def successors(self):
-        global tree
-        nodes  = [board(s,) for s in tree]
+
+        blanks = self.allBlanks()
+        next = self.togglePlayer(self.whoseTurn)
+        states = map(lambda v: self.move(v,self.whoseTurn),blanks)
+        nodes  = [(m,board(s,next)) for m,s in states]
+        return nodes
 
     def isTerminal(self):
-        return self.winFor(0) or self.winFor(1) or self.moves == 50
+        return self.winFor(0) or self.winFor(1)
 
-    def winFor(self, player):
-        if self.chachedWin is False:
+    def utility(self):
+        if self.winFor(0):
+            return 1
+        elif self.winFor(1):
+            return -1
+        else:
+            return 0
+
+
+    def winFor(self,player):
+        if self.cachedWin is False:
             if player == 0:
                 if self.q.y == 4:
-                    self.chachedWin = True
-                    self.chachedWinner = player
+                    self.cachedWin = True
+                    self.cachedWinner = player
                     return True
 
                 for val in self.pawns:
-                    if val.x != None or val.y !=None:
+                    if val.alive:
                         return False
                     else:
-                        self.chachedWin = True
-                        self.chachedWinner = player
+                        self.cachedWin = True
+                        self.cachedWinner = player
                         return True
             if player == 1:
-                if self.q.x == None and self.q.y == None:
-                    self.chachedWin = True
-                    self.chachedWinner = player
+                if self.q.alive is False:
+                    self.cachedWin = True
+                    self.cachedWinner = player
                     return True
         else:
-            return player == self.chachedWinner
+            return player == self.cachedWinner
 
     # Used for switching player
     def togglePlayer(self, p):
@@ -222,15 +239,11 @@ class board:
                     print(self.board[i][j], end='')
             print('')
 
-    def move(self, who, where):
+    def move(self, token, where):
 
         gs = self.gameState.copy()
-        gs[where] = who
-        return gs
-
-
-
-
+        gs[where] = token
+        return (where,token),gs
 
 
 def minimax(start):
@@ -257,5 +270,35 @@ def minimax(start):
     result = do_minimax(start)
     # print(transpositionTable)
     return result
+
+
+initState = np.zeros((5,5),str)
+
+initialState = [[0 for x in range(5)] for y in range(5)]
+
+initState[2][0] = 'q'
+
+initState[1][1] = 'd1'
+initState[2][1] = 'd2'
+initState[3][1] = 'd3'
+
+initState[0][4] = 'p1'
+initState[1][4] = 'p2'
+initState[2][4] = 'p3'
+initState[3][4] = 'p4'
+initState[4][4] = 'p5'
+
+a = board(initState, player=1)
+
+print(a.whoseTurn)
+
+print(initState)
+#while not a.isTerminal():
+    # start = time.process_time()
+    # result = minimax(a)
+    # end = time.process_time()
+    # print('Took', end-start, 'seconds to determine the minimax value', result[0], 'for move', result[1])
+    # result[2].display()
+    # a = result[2]
 
 
