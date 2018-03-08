@@ -1,7 +1,8 @@
 # Assignment 2
 # CMPT 317
 # Chad A. Woitas
-
+import time as time
+import numpy as np
 
 class token:
 
@@ -101,11 +102,11 @@ class board:
     pawns.append(p4)
     pawns.append(p5)
 
-    def __init__(self, state, player, numMoves):
+    def __init__(self, state, player):
 
         self.x = 5
         self.y = 5
-        self.moves = numMoves
+
         if state is None:
             self.gameState = dict()
             for r in range(1,5):
@@ -114,8 +115,8 @@ class board:
         else:
             self.gameState = state
             self.whoseTurn = player
-            self.chachedWin = False
-            self.chachedWinner = None
+            self.cachedWin = False
+            self.cachedWinner = None
 
         self.q = self.gameState.q
 
@@ -141,36 +142,52 @@ class board:
     def isMaxNode(self):
         return self.whoseTurn == 1
 
+    def allBlanks(self):
+        return[v for v in self.gameState if self.gameState[v] == ' ']
+
     # Find the successor nodes
     def successors(self):
-        global tree
-        nodes  = [board(s,) for s in tree]
+
+        blanks = self.allBlanks()
+        next = self.togglePlayer(self.whoseTurn)
+        states = map(lambda v: self.move(v,self.whoseTurn),blanks)
+        nodes  = [(m,board(s,next)) for m,s in states]
+        return nodes
 
     def isTerminal(self):
-        return self.winFor(0) or self.winFor(1) or self.moves == 50
+        return self.winFor(0) or self.winFor(1)
 
-    def winFor(self, player):
-        if self.chachedWin is False:
+    def utility(self):
+        if self.winFor(0):
+            return 1
+        elif self.winFor(1):
+            return -1
+        else:
+            return 0
+
+
+    def winFor(self,player):
+        if self.cachedWin is False:
             if player == 0:
                 if self.q.y == 4:
-                    self.chachedWin = True
-                    self.chachedWinner = player
+                    self.cachedWin = True
+                    self.cachedWinner = player
                     return True
 
                 for val in self.pawns:
-                    if val.x != None or val.y !=None:
+                    if val.alive:
                         return False
                     else:
-                        self.chachedWin = True
-                        self.chachedWinner = player
+                        self.cachedWin = True
+                        self.cachedWinner = player
                         return True
             if player == 1:
-                if self.q.x == None and self.q.y == None:
-                    self.chachedWin = True
-                    self.chachedWinner = player
+                if self.q.alive is False:
+                    self.cachedWin = True
+                    self.cachedWinner = player
                     return True
         else:
-            return player == self.chachedWinner
+            return player == self.cachedWinner
 
     # Used for switching player
     def togglePlayer(self, p):
@@ -191,7 +208,7 @@ class board:
                     if thing.isEnemy(gs):
                         nextMove.append(i)
                 else:
-                    nextMove.append(i[0], i[1])
+                    nextMove.append(i)
             return nextMove
         elif thing.isPawn():
             for i in moves:
@@ -277,7 +294,8 @@ class board:
         #     if (abs(m1[0] - m2[0]) <= 1) or (abs(m1[1] - m2[1]) <= 1):
         #         if self.isPlayer(p2)
         #
-    @staticmethod
+
+    #TODO NOt static
     def isDiagonalMove(m1, m2):
         if (abs(m1[0]-m2[0]) == 1) and (abs(m1[0]-m2[0]) == 1):
             return True
@@ -294,15 +312,11 @@ class board:
                     print(self.board[i][j], end='')
             print('')
 
-    def move(self, who, where):
+    def move(self, token, where):
 
         gs = self.gameState.copy()
-        gs[where] = who
-        return gs
-
-
-
-
+        gs[where] = token
+        return (where,token),gs
 
 
 def minimax(start):
@@ -329,6 +343,7 @@ def minimax(start):
     result = do_minimax(start)
     # print(transpositionTable)
     return result
+
 
 
 # Begin Testing Below -------------------------------
