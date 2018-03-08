@@ -227,10 +227,13 @@ class board:
                         nextMove.append(i)
             return nextMove
 
-
+    # @params - two locations
+    # @return - true if valid move taken
     def makeMove(self, m1, m2):
         p1 = self.gameState(m1)
         p2 = self.gameState(m2)
+
+        # Check for players existestance
         if not self.isPlayer(p1):
             return False
         if self.isPlayer(p2):
@@ -244,6 +247,7 @@ class board:
             # Blank
             enemy = 2
 
+        # Check for player movement
         if p1.isPawn():
             # Check if move is 1 square in Straight line
             if ((abs(m1[0] - m2[0]) == 1) and not (abs(m1[1] - m2[1]) == 1)) or \
@@ -254,13 +258,14 @@ class board:
                     return True
                 else:
                     return False
-            elif self.isDiagonalMove(m1,m2):
+            elif self.isDiagonalMove(m1, m2):
                 if enemy == 1:
                     # TODO make kill function
                     self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
                     self.gameState[m1[0]][m1[1]] = ''
                     return True
                 else:
+                    # Else friendly or not a one step move
                     return False
             else:
                 return False
@@ -282,27 +287,9 @@ class board:
                 return False
         else:
             return False
+        # end player movement
 
-
-
-        elif
-        # elif p1.isPawn():
-        #     if (abs(m1[0]-m2[0]) <= 1) or (abs(m1[1]-m2[1]) <= 1):
-        #         if p1.isEnemy(p2):
-        #             if self.isDiagonalMove(m1, m2):
-        #                 p2.alive = False
-        #                 self.gameState[m2[0]][m2[1]] = p1
-        #                 self.gameState[m1[0]][m1[1]] = ' '
-        #         else:
-        #             p1.x = m2[0]
-        #             p2.y = m2[1]
-        # elif p1.isDragon() or p1.isQueen():
-        #     if (abs(m1[0] - m2[0]) <= 1) or (abs(m1[1] - m2[1]) <= 1):
-        #         if self.isPlayer(p2)
-        #
-
-    #TODO NOt static
-    def isDiagonalMove(m1, m2):
+    def isDiagonalMove(self, m1, m2):
         if (abs(m1[0]-m2[0]) == 1) and (abs(m1[0]-m2[0]) == 1):
             return True
         else:
@@ -318,11 +305,11 @@ class board:
                     print(self.board[i][j], end='')
             print('')
 
-    def move(self, token, where):
+    def move(self, thing, where):
 
         gs = self.gameState.copy()
-        gs[where] = token
-        return (where,token),gs
+        gs[where] = thing
+        return (where, thing), gs
 
 
 def minimax(start):
@@ -363,11 +350,4 @@ state[1][1] = token('dragon', 1, 1)
 state[2][1] = token('dragon', 2, 1)
 state[3][1] = token('dragon', 3, 1)
 
-# b = board(state, 0, 0)
-
-p = token('pawn', 0, 0)
-print(p.isQueen())
-print(p.isDragon())
-print(p.isPawn())
-p.display()
-print(p.alive)
+b = board(state, 0)
