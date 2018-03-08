@@ -1,9 +1,10 @@
 # Assignment 2
 # CMPT 317
-# Chad A. Woitas
+# Chad A. Woitas and Brandon Bachinyski
 import time as time
 import numpy as np
 from copy import deepcopy
+
 
 class token:
 
@@ -25,9 +26,9 @@ class token:
     # @param foe - type token
     def isEnemy(self, foe):
         if self.isPawn():
-            return foe.isPawn()
+            return foe.isDragon() or foe.isQueen()
         elif self.isDragon() or self.isQueen():
-            return foe.isDragon()
+            return foe.isPawn()
         else:
             print('ERROR not a valid type')
 
@@ -108,7 +109,7 @@ class board:
     pawns.append(p4)
     pawns.append(p5)
 
-    def __init__(self, state, player):
+    def __init__(self):
 
         self.x = 5
         self.y = 5
@@ -116,12 +117,12 @@ class board:
         self.board = [["" for i in range(5)] for j in range(5)]
 
         # if state is None:
-        #     self.gameState = dict()
+        #     self.board = dict()
         #     for r in range(1,5):
         #         for c in range(1,5):
-        #             self.gameState[r,c] = None
+        #             self.board[r,c] = None
         # else:
-        #     self.gameState = state
+        #     self.board = state
         #     self.whoseTurn = player
         #     self.cachedWin = False
         #     self.cachedWinner = None
@@ -137,11 +138,11 @@ class board:
         return self.whoseTurn == 1
 
     def allBlanks(self):
-        return[v for v in self.gameState if self.gameState[v] == ' ']
+        return[v for v in self.board if self.board[v] == ' ']
 
     # Find the successor nodes
     def successors(self,player):
-        successor= []
+        successor = []
 
         if player == 0:
             successor += self.moveAIPlayer(self.q)
@@ -199,8 +200,7 @@ class board:
             return 0
 
     # Heuristic function
-    def h1(self):
-
+    # def h1(self):
 
     # Return allowed moves
     def moveAIPlayer(self, thing):
@@ -209,7 +209,7 @@ class board:
 
         if thing.isQueen() or thing.isDragon():
             for i in moves:
-                gs = self.gameState[i[0]][i[1]]
+                gs = self.board[i[0]][i[1]]
                 if self.isPlayer(gs):
                     if thing.isEnemy(gs):
                         nextMove.append(i)
@@ -218,7 +218,7 @@ class board:
             return nextMove
         elif thing.isPawn():
             for i in moves:
-                gs = self.gameState[i[0]][i[1]]
+                gs = self.board[i[0]][i[1]]
                 if self.isDiagonalMove(thing.getCurrentLocaiton,i):
                     if thing.isEnemy(gs):
                         nextMove.append(i)
@@ -230,8 +230,8 @@ class board:
     # @params - two locations
     # @return - true if valid move taken
     def makeMove(self, m1, m2):
-        p1 = self.gameState(m1)
-        p2 = self.gameState(m2)
+        p1 = self.board(m1)
+        p2 = self.board(m2)
 
         # Check for players existestance
         if not self.isPlayer(p1):
@@ -253,16 +253,16 @@ class board:
             if ((abs(m1[0] - m2[0]) == 1) and not (abs(m1[1] - m2[1]) == 1)) or \
                     (not (abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 1)):
                 if enemy == 2:
-                    self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
-                    self.gameState[m1[0]][m1[1]] = ''
+                    self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
+                    self.board[m1[0]][m1[1]] = ''
                     return True
                 else:
                     return False
             elif self.isDiagonalMove(m1, m2):
                 if enemy == 1:
                     # TODO make kill function
-                    self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
-                    self.gameState[m1[0]][m1[1]] = ''
+                    self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
+                    self.board[m1[0]][m1[1]] = ''
                     return True
                 else:
                     # Else friendly or not a one step move
@@ -273,13 +273,13 @@ class board:
             # Check for not moving
             if (abs(m1[0] - m2[0]) <= 1) and (abs(m1[1] - m2[1]) <= 1):
                 if enemy == 2:
-                    self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
-                    self.gameState[m1[0]][m1[1]] = ''
+                    self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
+                    self.board[m1[0]][m1[1]] = ''
                     return True
                 elif enemy == 1:
                     # TODO MAKE KILL function
-                    self.gameState[m2[0]][m2[1]] = self.gameState[m1[0]][m1[1]]
-                    self.gameState[m1[0]][m1[1]] = ''
+                    self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
+                    self.board[m1[0]][m1[1]] = ''
                     return True
                 else:
                     return False
@@ -299,15 +299,16 @@ class board:
         print('')
         for i in range(self.x):
             for j in range(self.y):
-                if self.isPlayer(i, j):
-                    print(self.board[i][j].display(), end='')
-                else:
-                    print(self.board[i][j], end='')
+                print(self.board[i][j])
+                # if self.isPlayer(self.board[i][j]):
+                #     print(self.board[i][j], end='')
+                # else:
+                #     print(self.board[i][j], end='')
             print('')
 
     def move(self, thing, where):
 
-        gs = self.gameState.copy()
+        gs = self.board.copy()
         gs[where] = thing
         return (where, thing), gs
 
@@ -338,16 +339,24 @@ def minimax(start):
     return result
 
 
-
 # Begin Testing Below -------------------------------
+p = token('pawn', 0, 0)
+q = token('queen', 0, 0)
+d = token('dragon', 0, 0)
 
-state = [[0 for i in range(5)] for j in range(5)]
+# Completed Tests
+# print(p.isPawn())
+# print(p.isQueen())
+# print(p.isDragon())
+#
+# print(p.isEnemy(q))
+# print(p.isEnemy(d))
+# print(p.isEnemy(p))
+#
+# print(d.isEnemy(q))
+# print(d.isEnemy(d))
+# print(d.isEnemy(p))
+# print(p.nextAvailableMoves())
 
-for i in range(5):
-    state[i][4] = token('pawn', i, 4)
-state[2][0] = token('queen', 2, 0)
-state[1][1] = token('dragon', 1, 1)
-state[2][1] = token('dragon', 2, 1)
-state[3][1] = token('dragon', 3, 1)
-
-b = board(state, 0)
+initState = [["" for i in range(5)] for j in range(5)]
+b = board()
