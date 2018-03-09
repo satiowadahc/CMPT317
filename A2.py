@@ -92,7 +92,7 @@ class board:
         # self.cachedWinner = None
 
         self.initialBoard()
-        # self.selectPlayer()
+        self.selectPlayer()
 
     def initialBoard(self):
 
@@ -198,9 +198,9 @@ class board:
     # Used for switching player
     def togglePlayer(self, p):
         if p == 0:
-            return 1
+            self.whoseTurn = 1
         else:
-            return 0
+            self.whoseTurn = 0
 
     # Heuristic function
     # def h1(self, board):
@@ -385,10 +385,11 @@ class board:
             self.humanPlayer = 1
 
     def inputMove(self):
-        start = input("Who do you want to move? ")
-        end = input("Where do you want to move them?")
+        start = tuple(int(x.strip()) for x in input("Who do you want to move? ").split(','))
+        end = tuple(int(x.strip()) for x in input("Where do you want to move them?").split(','))
 
-        return start, end
+        self.makeMove(start,end)
+
 
 
 def minimax(start):
@@ -439,6 +440,11 @@ def minimax(start):
     # print(transpositionTable)
     return result
 
+def playGame():
+    b = board()
+    if b.humanPlayer == 1:
+        b.inputMove()
+    m = minimax(b)
 
 # Begin Testing Below -------------------------------
 # p = token('pawn')
@@ -498,3 +504,11 @@ start = time.process_time()
 result = minimax(b)
 end = time.process_time()
 print(result.display())
+playGame()
+# b = board()
+# b.display()
+#
+# start = time.process_time()
+# result = minimax(b)
+# end = time.process_time()
+# print(result)
