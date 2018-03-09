@@ -46,6 +46,9 @@ class token:
 
 class board:
 
+    humanPlayer = None
+    AI = None
+
     q = token('queen')
 
     d1 = token('dragon')
@@ -93,6 +96,7 @@ class board:
         self.cachedWinner = None
 
         self.initialBoard()
+        self.selectPlayer()
 
     def initialBoard(self):
 
@@ -356,6 +360,21 @@ class board:
             for j in range(self.x):
                 s += str(self.board[j][i])
         return s
+
+    def selectPlayer(self):
+        player = input("Select P1 or P2: ")
+
+        if player == "P1":
+            self.humanPlayer = 0
+
+        elif player == "P2":
+            self.humanPlayer = 1
+
+    def inputMove(self):
+        move = input("Enter a move: ")
+
+        return move
+
 
 def minimax(start):
     transpositionTable = dict()
