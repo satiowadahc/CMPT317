@@ -123,6 +123,7 @@ class board:
     # Find the successor nodes
     def successors(self, player):
         successor = []
+        nextMoves = []
 
         if player == 1:
             for i in range(self.y):
@@ -130,16 +131,23 @@ class board:
                     if isinstance(self.board[j][i], token):
                         if self.board[j][i].isPawn():
                             m1 = (j, i)
-                            successor.append(self.moveAIPlayer(m1))
+                            nextMoves.append(self.moveAIPlayer(m1))
+                            for k in nextMoves[0]:
+                                newBoard = deepcopy(self)
+                                successor.append(newBoard.makeMove(m1, k))
+                            nextMoves = []
         else:
             for i in range(self.y):
                 for j in range(self.x):
                     if isinstance(self.board[j][i], token):
                         if self.board[j][i].isDragon() or self.board[j][i].isQueen():
                             m1 = (j, i)
-                            successor.append(self.moveAIPlayer(m1))
+                            nextMoves.append(self.moveAIPlayer(m1))
+                            for k in nextMoves[0]:
+                                newBoard = deepcopy(self)
+                                successor.append(newBoard.makeMove(m1, k))
+                            nextMoves = []
         return successor
-
 
     def isTerminal(self):
         return self.winFor(0) or self.winFor(1)
@@ -163,10 +171,9 @@ class board:
                 for val in self.pawns:
                     if val.alive:
                         return False
-                    else:
-                        self.cachedWin = True
-                        self.cachedWinner = player
-                        return True
+                self.cachedWin = True
+                self.cachedWinner = player
+                return True
             if player == 1:
                 if self.q.alive is False:
                     self.cachedWin = True
@@ -183,8 +190,7 @@ class board:
             return 0
 
     # Heuristic function
-    #def h1(self, board):
-
+    # def h1(self, board):
 
     def nextAvailableMoves(self, m):
         x1 = m[0]
@@ -251,7 +257,7 @@ class board:
         p1 = self.board[m1[0]][m1[1]]
         p2 = self.board[m2[0]][m2[1]]
 
-        # Check for players existestance
+        # Check for players existence
         if not self.isPlayer(p1):
             return False
         if self.isPlayer(p2):
@@ -273,7 +279,8 @@ class board:
                 if enemy == 2:
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
-                    return True
+                    self.utility()
+                    return self
                 else:
                     return False
             elif self.isDiagonalMove(m1, m2):
@@ -282,7 +289,8 @@ class board:
                     print(self.attack(p1, p2))
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
-                    return True
+                    self.utility()
+                    return self
                 else:
                     # Else friendly or not a one step move
                     return False
@@ -294,13 +302,15 @@ class board:
                 if enemy == 2:
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
-                    return True
+                    self.utility()
+                    return self
                 elif enemy == 1:
                     # TODO MAKE KILL function
                     print(self.attack(p1, p2))
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
-                    return True
+                    self.utility()
+                    return self
                 else:
                     return False
             else:
@@ -315,23 +325,23 @@ class board:
         else:
             return False
 
-
     def attack(self, attacker, defender):
-
         if attacker.isPawn():
-            if self.isDiagonalMove(attacker, defender) and not defender.isPawn():
+            if not defender.isPawn():
                 if self.isPlayer(defender):
+                    defender.alive = False
                     return True
                 else:
                     return False
         elif attacker.isQueen() or attacker.isDragon():
             if defender.isPawn():
                 if self.isPlayer(defender):
+                    defender.alive = False
                     return True
                 else:
                     return False
         else:
-            return 'hi'
+            return False
 
     def display(self):
         print('')
@@ -340,6 +350,12 @@ class board:
                     print(self.board[j][i], end='')
             print('')
 
+    def str(self):
+        s = ''
+        for i in range(self.y):
+            for j in range(self.x):
+                s += str(self.board[j][i])
+        return s
 
 def minimax(start):
     transpositionTable = dict()
@@ -351,7 +367,7 @@ def minimax(start):
         elif node.isTerminal():
             u = node.utility()
         else:
-            vs = [do_minimax(c) for c in node.successors()]
+            vs = [do_minimax(c) for c in node.successors(0)]
             if node.isMaxNode():
                 u = max(vs)
             elif node.isMinNode():
@@ -368,11 +384,9 @@ def minimax(start):
 
 
 # Begin Testing Below -------------------------------
-p = token('pawn')
-q = token('queen')
-d = token('dragon')
-
-print('')
+# p = token('pawn')
+# q = token('queen')
+# d = token('dragon')
 # Completed Tests
 # print(p.isPawn())
 # print(p.isQueen())
@@ -390,20 +404,36 @@ print('')
 # b.makeMove(m, b.moveAIPlayer(m)[1])
 # print(b.successors(1))
 # b.display()
+# attack tested
+# b.makeMove(s1, s2)
+# b.display()
+# print(b.makeMove(s2, s3))
+# b.display()
+# print(b.makeMove(s3, s4))
+# b.display()
+# print(b.makeMove(s3, s5))
+# b.display()
+# print(b.makeMove(s4, s3))
+# b.display()
+# print(b.makeMove(s5, s4))
+# b.display()
+# print(b.makeMove(s4, s6))
+# b.display()
+
 b = board()
-m = (2, 0)
-b.display()
-s1 = (1, 1)
-s2 = (1, 2)
-s3 = (1, 3)
-s4 = (1, 4)
-
-b.makeMove(s1, s2)
-b.display()
-b.makeMove(s2, s3)
-b.display()
-b.makeMove(s3, s4)
-b.display()
-b.makeMove(s4, s3)
 b.display()
 
+tree = b.successors(1)
+print(len(tree))
+for i in range(len(tree)):
+    print(tree[i].display())
+# s1 = (3, 4)
+# s2 = (3, 3)
+# s3 = (3, 2)
+# s4 = (3, 1)
+# s5 = (2, 1)
+# s6 = (2, 0)
+
+# start = time.process_time()
+# result = minimax(b)
+# end = time.process_time()
