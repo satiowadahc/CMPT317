@@ -49,6 +49,9 @@ class board:
     humanPlayer = None
     AI = None
 
+    player1score = 0
+    player0score = 0
+
     q = token('queen')
 
     d1 = token('dragon')
@@ -304,13 +307,16 @@ class board:
             # Check for not moving
             if (abs(m1[0] - m2[0]) <= 1) and (abs(m1[1] - m2[1]) <= 1):
                 if enemy == 2:
+                    if p1.isQueen() and (abs(m1[1] - m2[1]) == 1):
+                        self.player0score += 1
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
                     self.utility()
                     return self
                 elif enemy == 1:
-                    # TODO MAKE KILL function
-                    print(self.attack(p1, p2))
+                    if p1.isQueen() and (abs(m1[1] - m2[1]) == 1):
+                        self.player0score += 1
+                    self.attack(p1, p2)
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
                     self.utility()
@@ -334,12 +340,14 @@ class board:
             if not defender.isPawn():
                 if self.isPlayer(defender):
                     defender.alive = False
+                    self.player1score += 1
                     return True
                 else:
                     return False
         elif attacker.isQueen() or attacker.isDragon():
             if defender.isPawn():
                 if self.isPlayer(defender):
+                    self.player0score += 1
                     defender.alive = False
                     return True
                 else:
@@ -424,34 +432,39 @@ def minimax(start):
 # print(b.successors(1))
 # b.display()
 # attack tested
-# b.makeMove(s1, s2)
-# b.display()
-# print(b.makeMove(s2, s3))
-# b.display()
-# print(b.makeMove(s3, s4))
-# b.display()
-# print(b.makeMove(s3, s5))
-# b.display()
-# print(b.makeMove(s4, s3))
-# b.display()
-# print(b.makeMove(s5, s4))
-# b.display()
-# print(b.makeMove(s4, s6))
-# b.display()
+
 
 b = board()
 b.display()
 
-tree = b.successors(1)
-print(len(tree))
-for i in range(len(tree)):
-    print(tree[i].display())
-# s1 = (3, 4)
-# s2 = (3, 3)
-# s3 = (3, 2)
-# s4 = (3, 1)
-# s5 = (2, 1)
-# s6 = (2, 0)
+# tree = b.successors(1)
+# print(len(tree))
+# for i in range(len(tree)):
+#     print(tree[i].display())
+
+s1 = (3, 4)
+s2 = (3, 3)
+s3 = (3, 2)
+s4 = (3, 1)
+s5 = (2, 1)
+s6 = (2, 0)
+b.makeMove(s1, s2)
+b.display()
+b.makeMove(s2, s3)
+b.display()
+b.makeMove(s3, s4)
+b.display()
+b.makeMove(s3, s5)
+b.display()
+b.makeMove(s4, s3)
+b.display()
+print(b.player1score, b.player0score)
+b.makeMove(s5, s4)
+b.display()
+print(b.player1score, b.player0score)
+b.makeMove(s4, s6)
+b.display()
+print(b.player1score, b.player0score)
 
 # start = time.process_time()
 # result = minimax(b)
