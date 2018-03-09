@@ -415,10 +415,8 @@ def minimax(start):
                 if boardState.isMaxNode():
                     m = 0
                     for c in vs:
-                        if isinstance(c, board):
-                            print(c)
+
                             if m < c.Max():
-                                print(m)
                                 m = c.Max()
                                 u = c
 
@@ -426,9 +424,10 @@ def minimax(start):
                     print('min')
                     m = 0
                     for c in vs:
-                        if m > c.Min():
-                            m = c.Min()
-                            u = c
+                        if isinstance(c, board):
+                            if m > c.Min():
+                                m = c.Min()
+                                u = c
                 else:
                     print("Something went horribly wrong")
                     return None
