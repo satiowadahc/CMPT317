@@ -134,7 +134,7 @@ class board:
     # Find the successor nodes
     def successors(self):
         successor = []
-        nextMoves = []
+        nextMoves = ['0']
 
         player = self.whoseTurn
 
@@ -145,10 +145,11 @@ class board:
                         if self.board[j][i].isPawn():
                             m1 = (j, i)
                             nextMoves.append(self.moveAIPlayer(m1))
+                            nextMoves.remove('0')
                             for k in nextMoves[0]:
                                 newBoard = deepcopy(self)
                                 successor.append(newBoard.makeMove(m1, k))
-                            nextMoves = []
+                            nextMoves = ['0']
         else:
             for i in range(self.y):
                 for j in range(self.x):
@@ -156,10 +157,11 @@ class board:
                         if self.board[j][i].isDragon() or self.board[j][i].isQueen():
                             m1 = (j, i)
                             nextMoves.append(self.moveAIPlayer(m1))
+                            nextMoves.remove('0')
                             for k in nextMoves[0]:
                                 newBoard = deepcopy(self)
                                 successor.append(newBoard.makeMove(m1, k))
-                            nextMoves = []
+                            nextMoves = ['0']
 
         self.togglePlayer(player)
         return successor
@@ -211,16 +213,16 @@ class board:
             return {(x1, y1 - 1), (x1 - 1, y1), (x1 + 1, y1), (x1, y1 + 1),
                     (x1 - 1, y1 - 1), (x1 - 1, y1 + 1), (x1 + 1, y1 - 1), (x1 + 1, y1 + 1)}
         # 2 Can't Go NegX
-        elif x1 == 0 and 1 < y1 < 4:
+        elif x1 == 0 and 0 < y1 < 4:
             return {(x1, y1 - 1), (x1 + 1, y1), (x1, y1 + 1), (x1 + 1, y1 - 1), (x1 + 1, y1 + 1)}
         # 3 Can't go PosX
         elif x1 == 4 and 0 < y1 < 4:
             return {(x1, y1 - 1), (x1 - 1, y1), (x1, y1 + 1), (x1 - 1, y1 - 1), (x1 - 1, y1 + 1)}
         # 4 Can't go NegY
-        elif 0 < x1 < 4 and y1 == 0:
+        elif 0 <= x1 <= 4 and y1 == 0:
             return {(x1 - 1, y1), (x1 + 1, y1), (x1, y1 + 1), (x1 - 1, y1 + 1), (x1 + 1, y1 + 1)}
         # 5 Can't go PosY
-        elif 0 < x1 < 4 and y1 == 4:
+        elif 0 <= x1 <= 4 and y1 == 4:
             return {(x1, y1 - 1), (x1 - 1, y1), (x1 + 1, y1), (x1 - 1, y1 - 1), (x1 + 1, y1 - 1)}
         # 6 Can't go NegX or NegY
         elif x1 == 0 and y1 == 0:
@@ -235,13 +237,14 @@ class board:
         elif x1 == 4 and y1 == 0:
             return {(x1 - 1, y1), (x1, y1 + 1), (x1 - 1, y1 + 1)}
         else:
+            print('Somethings not right')
             return {()}
 
     # Return allowed moves
     def moveAIPlayer(self, m1):
         moves = self.nextAvailableMoves(m1)
         thing = self.board[m1[0]][m1[1]]
-        nextMove = []
+        nextMove = ['0']
         if thing.isQueen() or thing.isDragon():
             for i in moves:
                 if 5 > i[0] >= 0 and 5 > i[1] >= 0:
@@ -251,17 +254,18 @@ class board:
                             nextMove.append(i)
                     else:
                         nextMove.append(i)
-                return nextMove
+            return nextMove
         elif thing.isPawn():
             for i in moves:
-                if 5 > i[0] > 0 and 5 > i[1] > 0:
+                if 4 >= i[0] >= 0 and 4 >= i[1] >= 0:
                     gs = self.board[i[0]][i[1]]
                     if self.isDiagonalMove(m1, i):
                         if thing.isEnemy(gs):
                             nextMove.append(i)
-                    else:
-                        if not thing.isEnemy(gs):
+                    elif not self.isPlayer(gs):
                             nextMove.append(i)
+            nextMove.remove('0')
+            # print(nextMove)
             return nextMove
 
     # @params - two locations
@@ -298,7 +302,7 @@ class board:
             elif self.isDiagonalMove(m1, m2):
                 if enemy == 1:
                     # TODO make kill function
-                    print(self.attack(p1, p2))
+                    self.attack(p1, p2)
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
                     return self
@@ -332,7 +336,7 @@ class board:
         # end player movement
 
     def isDiagonalMove(self, m1, m2):
-        if (abs(m1[0]-m2[0]) == 1) and (abs(m1[0]-m2[0]) == 1):
+        if (abs(m1[0]-m2[0]) == 1) and (abs(m1[1]-m2[1]) == 1):
             return True
         else:
             return False
@@ -391,33 +395,46 @@ def minimax(start):
     transpositionTable = dict()
 
     def do_minimax(boardState, counter):
-        if counter < 25:
+        if counter < 10:
             counter += 1
-            print(counter)
-            boardState.display()
             s = boardState.str()
             u = []
+            vs = []
             if s in transpositionTable:
+                # print('t', transpositionTable)
                 return transpositionTable[s]
             elif boardState.utility(counter) == (-1 or 1 or 0):
                 u = boardState.utility(counter)
             else:
+                boardState.successors()
                 for c in boardState.successors():
-                    if isinstance(c, board):
-                        vs = do_minimax(c, counter)
-                        # print(vs)
+                    # print(c.str())
+                    vst = do_minimax(c, counter)
+                    vs.append(vst)
+                    u = c
                 if boardState.isMaxNode():
-                    print('max')
+                    m = 0
+                    for c in vs:
+                        if isinstance(c, board):
+                            print(c)
+                            if m < c.Max():
+                                print(m)
+                                m = c.Max()
+                                u = c
 
                 elif boardState.isMinNode():
                     print('min')
-                    # u = min(vs)
+                    m = 0
+                    for c in vs:
+                        if m > c.Min():
+                            m = c.Min()
+                            u = c
                 else:
                     print("Something went horribly wrong")
                     return None
-            for i in u:
-                print(i)
-                transpositionTable[s] = i
+            # print('u', u)
+            transpositionTable[s] = u
+            # print('u', u)
             return u
     result = do_minimax(start, 0)
     # print(transpositionTable)
@@ -481,4 +498,4 @@ b.display()
 start = time.process_time()
 result = minimax(b)
 end = time.process_time()
-print(result)
+print(result.display())
