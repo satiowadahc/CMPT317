@@ -99,7 +99,7 @@ class board:
         self.cachedWinner = None
 
         self.initialBoard()
-        self.selectPlayer()
+        # self.selectPlayer()
 
     def initialBoard(self):
 
@@ -124,13 +124,21 @@ class board:
     def isMaxNode(self):
         return self.whoseTurn == 1
 
+    def player1Max(self):
+        return self.player1score
+
+    def player0Min(self):
+        return self.player0score
+
     def allBlanks(self):
         return[v for v in self.board if self.board[v] == ' ']
 
     # Find the successor nodes
-    def successors(self, player):
+    def successors(self):
         successor = []
         nextMoves = []
+
+        player = self.whoseTurn
 
         if player == 1:
             for i in range(self.y):
@@ -249,13 +257,14 @@ class board:
             return nextMove
         elif thing.isPawn():
             for i in moves:
-                gs = self.board[i[0]][i[1]]
-                if self.isDiagonalMove(m1, i):
-                    if thing.isEnemy(gs):
-                        nextMove.append(i)
-                else:
-                    if not thing.isEnemy(gs):
-                        nextMove.append(i)
+                if 5 > i[0] > 0 and 5 > i[1] > 0:
+                    gs = self.board[i[0]][i[1]]
+                    if self.isDiagonalMove(m1, i):
+                        if thing.isEnemy(gs):
+                            nextMove.append(i)
+                    else:
+                        if not thing.isEnemy(gs):
+                            nextMove.append(i)
             return nextMove
 
     # @params - two locations
@@ -387,25 +396,38 @@ class board:
 def minimax(start):
     transpositionTable = dict()
 
-    def do_minimax(node):
-        s = node.str()
-        if s in transpositionTable:
-            return transpositionTable[s]
-        elif node.isTerminal():
-            u = node.utility()
-        else:
-            vs = [do_minimax(c) for c in node.successors(0)]
-            if node.isMaxNode():
-                u = max(vs)
-            elif node.isMinNode():
-                u = min(vs)
+    def do_minimax(boardState, counter):
+        if counter < 25:
+            counter += 1
+            s = boardState.str()
+            u = []
+            if s in transpositionTable:
+                # print(s)
+                # print(transpositionTable, counter)
+                return transpositionTable[s]
+            elif boardState.isTerminal():
+                u = boardState.utility()
             else:
-                print("Something went horribly wrong")
-                return None
-        transpositionTable[s] = u
-        return u
+                for c in boardState.successors():
+                    if isinstance(c, board):
+                        vs = do_minimax(c, counter)
+                        # print(vs)
+                if boardState.isMaxNode():
+                    print('max')
+                    # u = max(vs)
+                elif boardState.isMinNode():
+                    print('min')
+                    # u = min(vs)
+                else:
+                    print("Something went horribly wrong")
+                    return None
+            # print(u)
+            for i in u:
+                # print(i)
+                transpositionTable[s] = i
 
-    result = do_minimax(start)
+            return u
+    result = do_minimax(start, 0)
     # print(transpositionTable)
     return result
 
@@ -432,40 +454,39 @@ def minimax(start):
 # print(b.successors(1))
 # b.display()
 # attack tested
-
-
-b = board()
-b.display()
-
 # tree = b.successors(1)
 # print(len(tree))
 # for i in range(len(tree)):
 #     print(tree[i].display())
+#
+# s1 = (3, 4)
+# s2 = (3, 3)
+# s3 = (3, 2)
+# s4 = (3, 1)
+# s5 = (2, 1)
+# s6 = (2, 0)
+# b.makeMove(s1, s2)
+# b.display()
+# b.makeMove(s2, s3)
+# b.display()
+# b.makeMove(s3, s4)
+# b.display()
+# b.makeMove(s3, s5)
+# b.display()
+# b.makeMove(s4, s3)
+# b.display()
+# print(b.player1score, b.player0score)
+# b.makeMove(s5, s4)
+# b.display()
+# print(b.player1score, b.player0score)
+# b.makeMove(s4, s6)
+# b.display()
+# print(b.player1score, b.player0score)
 
-s1 = (3, 4)
-s2 = (3, 3)
-s3 = (3, 2)
-s4 = (3, 1)
-s5 = (2, 1)
-s6 = (2, 0)
-b.makeMove(s1, s2)
+b = board()
 b.display()
-b.makeMove(s2, s3)
-b.display()
-b.makeMove(s3, s4)
-b.display()
-b.makeMove(s3, s5)
-b.display()
-b.makeMove(s4, s3)
-b.display()
-print(b.player1score, b.player0score)
-b.makeMove(s5, s4)
-b.display()
-print(b.player1score, b.player0score)
-b.makeMove(s4, s6)
-b.display()
-print(b.player1score, b.player0score)
 
-# start = time.process_time()
-# result = minimax(b)
-# end = time.process_time()
+start = time.process_time()
+result = minimax(b)
+end = time.process_time()
+print(result)
