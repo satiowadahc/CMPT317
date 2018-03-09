@@ -292,7 +292,6 @@ class board:
                 if enemy == 2:
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
-                    self.utility()
                     return self
                 else:
                     return False
@@ -302,7 +301,6 @@ class board:
                     print(self.attack(p1, p2))
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
-                    self.utility()
                     return self
                 else:
                     # Else friendly or not a one step move
@@ -317,7 +315,6 @@ class board:
                         self.player0score += 1
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
-                    self.utility()
                     return self
                 elif enemy == 1:
                     if p1.isQueen() and (abs(m1[1] - m2[1]) == 1):
@@ -325,7 +322,6 @@ class board:
                     self.attack(p1, p2)
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
-                    self.utility()
                     return self
                 else:
                     return False
@@ -395,7 +391,7 @@ def minimax(start):
     transpositionTable = dict()
 
     def do_minimax(boardState, counter):
-        if counter < 5:
+        if counter < 25:
             counter += 1
             print(counter)
             boardState.display()
@@ -403,8 +399,8 @@ def minimax(start):
             u = []
             if s in transpositionTable:
                 return transpositionTable[s]
-            elif boardState.isTerminal():
-                u = boardState.utility()
+            elif boardState.utility(counter) == (-1 or 1 or 0):
+                u = boardState.utility(counter)
             else:
                 for c in boardState.successors():
                     if isinstance(c, board):
