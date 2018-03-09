@@ -117,12 +117,17 @@ class board:
     def isMaxNode(self):
         return self.whoseTurn == 1
 
-    def player1Max(self):
-        return self.player1score
+    def Max(self):
+        if self.whoseTurn == 0:
+            return self.player0score
+        else:
+            return self.player1score
 
-    def player0Min(self):
-        return self.player0score
-
+    def Min(self):
+        if self.whoseTurn == 0:
+            return self.player1score
+        else:
+            return self.player0score
     def allBlanks(self):
         return[v for v in self.board if self.board[v] == ' ']
 
@@ -239,13 +244,14 @@ class board:
         nextMove = []
         if thing.isQueen() or thing.isDragon():
             for i in moves:
-                gs = self.board[i[0]][i[1]]
-                if self.isPlayer(gs):
-                    if thing.isEnemy(gs):
+                if 5 > i[0] >= 0 and 5 > i[1] >= 0:
+                    gs = self.board[i[0]][i[1]]
+                    if self.isPlayer(gs):
+                        if thing.isEnemy(gs):
+                            nextMove.append(i)
+                    else:
                         nextMove.append(i)
-                else:
-                    nextMove.append(i)
-            return nextMove
+                return nextMove
         elif thing.isPawn():
             for i in moves:
                 if 5 > i[0] > 0 and 5 > i[1] > 0:
@@ -389,13 +395,13 @@ def minimax(start):
     transpositionTable = dict()
 
     def do_minimax(boardState, counter):
-        if counter < 25:
+        if counter < 5:
             counter += 1
+            print(counter)
+            boardState.display()
             s = boardState.str()
             u = []
             if s in transpositionTable:
-                # print(s)
-                # print(transpositionTable, counter)
                 return transpositionTable[s]
             elif boardState.isTerminal():
                 u = boardState.utility()
@@ -406,18 +412,16 @@ def minimax(start):
                         # print(vs)
                 if boardState.isMaxNode():
                     print('max')
-                    # u = max(vs)
+
                 elif boardState.isMinNode():
                     print('min')
                     # u = min(vs)
                 else:
                     print("Something went horribly wrong")
                     return None
-            # print(u)
             for i in u:
-                # print(i)
+                print(i)
                 transpositionTable[s] = i
-
             return u
     result = do_minimax(start, 0)
     # print(transpositionTable)
