@@ -46,8 +46,12 @@ class token:
 
 class board:
 
+    maxPly = 50
     humanPlayer = None
     AI = None
+    player1Win = 1
+    player2Win = -1
+    draw = 0
 
     player1score = 0
     player0score = 0
@@ -83,20 +87,9 @@ class board:
 
         self.board = [[0 for i in range(5)] for j in range(5)]
 
-        # if state is None:
-        #     self.board = dict()
-        #     for r in range(1,5):
-        #         for c in range(1,5):
-        #             self.board[r,c] = None
-        # else:
-        #     self.board = state
-        #     self.whoseTurn = player
-        #     self.cachedWin = False
-        #     self.cachedWinner = None
-
         self.whoseTurn = 1
-        self.cachedWin = False
-        self.cachedWinner = None
+        # self.cachedWin = False
+        # self.cachedWinner = None
 
         self.initialBoard()
         # self.selectPlayer()
@@ -162,40 +155,38 @@ class board:
                                 newBoard = deepcopy(self)
                                 successor.append(newBoard.makeMove(m1, k))
                             nextMoves = []
+
+        self.togglePlayer(player)
         return successor
 
-    def isTerminal(self):
-        return self.winFor(0) or self.winFor(1)
+    # def isTerminal(self):
+    #     return self.utility(0) or self.winFor(1)
 
-    def utility(self):
-        if self.winFor(0):
-            return 1
-        elif self.winFor(1):
-            return -1
-        else:
-            return 0
 
-    def winFor(self, player):
-        if self.cachedWin is False:
-            if player == 0:
-                if self.q.y == 4:
-                    self.cachedWin = True
-                    self.cachedWinner = player
-                    return True
+    def utility(self, ply):
+        # if self.cachedWin is False:
+            # if player == 0:
+            if self.q.y == 4:
+                    # self.cachedWin = True
+                    # self.cachedWinner = player
+                return self.player1Win
 
-                for val in self.pawns:
-                    if val.alive:
-                        return False
-                self.cachedWin = True
-                self.cachedWinner = player
-                return True
-            if player == 1:
-                if self.q.alive is False:
-                    self.cachedWin = True
-                    self.cachedWinner = player
-                    return True
-        else:
-            return player == self.cachedWinner
+            # for val in self.pawns:
+            #     if val.alive:
+            #         return False
+            #     self.cachedWin = True
+            #     self.cachedWinner = player
+            #     return True
+            # if player == 1:
+            if self.q.alive is False:
+                # self.cachedWin = True
+                # self.cachedWinner = player
+                return self.player2Win
+
+            if ply == self.maxPly:
+                return self.draw
+        # else:
+            return ply
 
     # Used for switching player
     def togglePlayer(self, p):
@@ -388,9 +379,10 @@ class board:
             self.humanPlayer = 1
 
     def inputMove(self):
-        move = input("Enter a move: ")
+        start = input("Who do you want to move? ")
+        end = input("Where do you want to move them?")
 
-        return move
+        return start, end
 
 
 def minimax(start):
