@@ -2,7 +2,6 @@
 # CMPT 317
 # Chad A. Woitas and Brandon Bachynski
 import time as time
-import numpy as np
 from copy import deepcopy
 
 
@@ -49,6 +48,9 @@ class board:
     maxPly = 50
     humanPlayer = None
     AI = None
+    # TODO standardize to P1 and P2
+    # 1 - Queens
+    # 2 - Wights
     player1Win = 1
     player2Win = -1
     draw = 0
@@ -88,8 +90,6 @@ class board:
         self.board = [[0 for i in range(5)] for j in range(5)]
 
         self.whoseTurn = 1
-        # self.cachedWin = False
-        # self.cachedWinner = None
 
         self.initialBoard()
         self.selectPlayer()
@@ -119,17 +119,17 @@ class board:
 
     def Max(self):
         if self.whoseTurn == 0:
+            # TODO STANDARDIZE
             return self.player0score
         else:
             return self.player1score
 
     def Min(self):
         if self.whoseTurn == 0:
+            # TODO STANDARDIZE
             return self.player1score
         else:
             return self.player0score
-    def allBlanks(self):
-        return[v for v in self.board if self.board[v] == ' ']
 
     # Find the successor nodes
     def successors(self):
@@ -166,34 +166,17 @@ class board:
         self.togglePlayer(player)
         return successor
 
-    # def isTerminal(self):
-    #     return self.utility(0) or self.winFor(1)
-
-
     def utility(self, ply):
-        # if self.cachedWin is False:
-            # if player == 0:
-            if self.q.y == 4:
-                    # self.cachedWin = True
-                    # self.cachedWinner = player
-                return self.player1Win
+        if self.q.y == 4:
+            return self.player1Win
 
-            # for val in self.pawns:
-            #     if val.alive:
-            #         return False
-            #     self.cachedWin = True
-            #     self.cachedWinner = player
-            #     return True
-            # if player == 1:
-            if self.q.alive is False:
-                # self.cachedWin = True
-                # self.cachedWinner = player
-                return self.player2Win
+        if self.q.alive is False:
+            return self.player2Win
 
-            if ply == self.maxPly:
-                return self.draw
-        # else:
-            return ply
+        if ply == self.maxPly:
+            return self.draw
+
+        return ply
 
     # Used for switching player
     def togglePlayer(self, p):
@@ -201,9 +184,6 @@ class board:
             self.whoseTurn = 1
         else:
             self.whoseTurn = 0
-
-    # Heuristic function
-    # def h1(self, board):
 
     def nextAvailableMoves(self, m):
         x1 = m[0]
@@ -244,6 +224,7 @@ class board:
     def moveAIPlayer(self, m1):
         moves = self.nextAvailableMoves(m1)
         thing = self.board[m1[0]][m1[1]]
+        # TODO Remove 0's
         nextMove = ['0']
         if thing.isQueen() or thing.isDragon():
             for i in moves:
@@ -266,11 +247,11 @@ class board:
                     elif not self.isPlayer(gs):
                             nextMove.append(i)
             nextMove.remove('0')
-            # print(nextMove)
             return nextMove
 
     # @params - two locations
-    # @return - true if valid move taken
+    # @return - false if invalid move taken
+    #         - board if taken
     def makeMove(self, m1, m2):
         p1 = self.board[m1[0]][m1[1]]
         p2 = self.board[m2[0]][m2[1]]
@@ -302,7 +283,6 @@ class board:
                     return False
             elif self.isDiagonalMove(m1, m2):
                 if enemy == 1:
-                    # TODO make kill function
                     self.attack(p1, p2)
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
@@ -392,7 +372,6 @@ class board:
         self.makeMove(start,end)
 
 
-
 def minimax(start):
     transpositionTable = dict()
 
@@ -403,14 +382,13 @@ def minimax(start):
             u = []
             vs = []
             if s in transpositionTable:
-                # print('t', transpositionTable)
                 return transpositionTable[s]
             elif boardState.utility(counter) == (-1 or 1 or 0):
                 u = boardState.utility(counter)
             else:
                 boardState.successors()
                 for c in boardState.successors():
-                    if(isinstance(c,board)):
+                    if isinstance(c, board):
                         vst = do_minimax(c, counter)
                         vs.append(vst)
                         u = c
@@ -432,13 +410,11 @@ def minimax(start):
                 else:
                     print("Something went horribly wrong")
                     return None
-            # print('u', u)
             transpositionTable[s] = u
-            # print('u', u)
             return u
     result = do_minimax(start, 0)
-    # print(transpositionTable)
     return result
+
 
 def playGame():
     b = board()
@@ -447,69 +423,6 @@ def playGame():
     m = minimax(b)
     print(m.display())
 
-# Begin Testing Below -------------------------------
-# p = token('pawn')
-# q = token('queen')
-# d = token('dragon')
-# Completed Tests
-# print(p.isPawn())
-# print(p.isQueen())
-# print(p.isDragon())
-#
-# print(p.isEnemy(q))
-# print(p.isEnemy(d))
-# print(p.isEnemy(p))
-#
-# print(d.isEnemy(q))
-# print(d.isEnemy(d))
-# print(d.isEnemy(p))
-# print(b.nextAvailableMoves())
-# print(b.moveAIPlayer(m))
-# b.makeMove(m, b.moveAIPlayer(m)[1])
-# print(b.successors(1))
-# b.display()
-# attack tested
-# tree = b.successors(1)
-# print(len(tree))
-# for i in range(len(tree)):
-#     print(tree[i].display())
-#
-# s1 = (3, 4)
-# s2 = (3, 3)
-# s3 = (3, 2)
-# s4 = (3, 1)
-# s5 = (2, 1)
-# s6 = (2, 0)
-# b.makeMove(s1, s2)
-# b.display()
-# b.makeMove(s2, s3)
-# b.display()
-# b.makeMove(s3, s4)
-# b.display()
-# b.makeMove(s3, s5)
-# b.display()
-# b.makeMove(s4, s3)
-# b.display()
-# print(b.player1score, b.player0score)
-# b.makeMove(s5, s4)
-# b.display()
-# print(b.player1score, b.player0score)
-# b.makeMove(s4, s6)
-# b.display()
-# print(b.player1score, b.player0score)
-#
-# b = board()
-# b.display()
-#
-# start = time.process_time()
-# result = minimax(b)
-# end = time.process_time()
-# print(result.display())
+
+# Begin Testing --------------------------------------------------
 playGame()
-# b = board()
-# b.display()
-#
-# start = time.process_time()
-# result = minimax(b)
-# end = time.process_time()
-# print(result.display())
