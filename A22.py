@@ -15,54 +15,59 @@ class token:
             return '0'
 
 
-def test():
+# Useful Functions -------------------
+def isToken(thing):
+    return isinstance(thing, token)
 
-    def isToken(thing):
-        return isinstance(thing, token)
 
-    def isDragon(thing):
-        if isToken(thing):
-            return thing.type == 'dragon'
-        else:
-            return False
+def isDragon(thing):
+    if isToken(thing):
+        return thing.type == 'dragon'
+    else:
+        return False
 
-    def isQueen(thing):
-        if isToken(thing):
-            return thing.type == 'queen'
-        else:
-            return False
 
-    def isPawn(thing):
-        if isToken(thing):
-            return thing.type == 'pawn'
-        else:
-            return False
+def isQueen(thing):
+    if isToken(thing):
+        return thing.type == 'queen'
+    else:
+        return False
 
-    def isEnemy(thing, foe):
-        if isPawn(thing) and (isDragon(foe) or isQueen(foe)):
-            return True
-        elif isPawn(foe) and (isDragon(thing) or isQueen(thing)):
-            return True
-        else:
-            return False
 
-    def isDiagonal(m1, m2):
-        if (abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 1):
-            return True
-        else:
-            return False
+def isPawn(thing):
+    if isToken(thing):
+        return thing.type == 'pawn'
+    else:
+        return False
 
-    def isStraight(m1, m2):
-        if ((abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 0)) or\
-           ((abs(m1[0] - m2[0]) == 0) and (abs(m1[1] - m2[1]) == 1)):
-            return True
-        else:
-            return False
+
+def isEnemy(thing, foe):
+    if isPawn(thing) and (isDragon(foe) or isQueen(foe)):
+        return True
+    elif isPawn(foe) and (isDragon(thing) or isQueen(thing)):
+        return True
+    else:
+        return False
+
+
+def isDiagonal(m1, m2):
+    if (abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 1):
+        return True
+    else:
+        return False
+
+
+def isStraight(m1, m2):
+    if ((abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 0)) or\
+       ((abs(m1[0] - m2[0]) == 0) and (abs(m1[1] - m2[1]) == 1)):
+        return True
+    else:
+        return False
 
 
 class game:
 
-    def __init__(self, board=[]):
+    def __init__(self, board=[1]):
         self.x = 5
         self.y = 5
 
@@ -73,8 +78,18 @@ class game:
         self.p = [token('pawn') for c in range(5)]
 
         # Board area
-        if board is []:
-            self.board = self.initialBoard()
+        if board[0] == 1:
+            self.board = [[0 for y in range(5)] for x in range(5)]
+            self.board[2][0] = self.q
+            self.board[1][1] = self.d[1]
+            self.board[2][1] = self.d[2]
+            self.board[3][1] = self.d[0]
+
+            self.board[0][4] = self.p[1]
+            self.board[1][4] = self.p[2]
+            self.board[2][4] = self.p[3]
+            self.board[3][4] = self.p[4]
+            self.board[4][4] = self.p[0]
         else:
             self.board = board
 
@@ -89,20 +104,6 @@ class game:
         self.cachedWin = False
 
     # SETUP FUNCTIONS ---------------------------------
-    def initialBoard(self):
-        board = [[0 for y in range(5)] for x in range(5)]
-        board[2][0] = self.q
-        board[1][1] = self.d[1]
-        board[2][1] = self.d[2]
-        board[3][1] = self.d[0]
-
-        board[0][4] = self.p[1]
-        board[1][4] = self.p[2]
-        board[2][4] = self.p[3]
-        board[3][4] = self.p[4]
-        board[4][4] = self.p[0]
-        return board
-
     def initPlayers(self, Human=False):
         # TODO Add human Toggle
         if Human:
@@ -155,7 +156,7 @@ class game:
 
     def winFor(self):
         # Queen is Dead
-        if self.q.Alive is False:
+        if self.q.alive is False:
             self.cachedWin = True
             self.cachedWinner = self.wights
             return True
@@ -172,21 +173,21 @@ class game:
         return self.utility() == self.winFor()
 
     def utility(self):
-        # TODO: Correct Queen Y Coordinates
-        if self.q.y == 4:
-            return 1
-        elif self.q.alive is False:
+        for i in range(5):
+            if isQueen(self.board[i][4]):
+                return 1
+        if self.q.alive is False:
             return -1
         else:
             return 0
 
-
+    # TODO: Add return board Function
 
     #  DISPLAY FUNCTIONS -----------------------------
     def display(self):
         print('')
-        for i in range(self.y):
-            for j in range(self.x):
+        for i in range(5):
+            for j in range(5):
                     print(self.board[j][i], end='')
             print('')
 
@@ -237,13 +238,12 @@ class game:
         moves = self.nextAvailableMoves(m1)
         thing = self.board[m1[0]][m1[1]]
         nextMove = []
-        t = test()
 
         if thing.isQueen() or thing.isDragon():
             for i in moves:
                 if 5 > i[0] >= 0 and 5 > i[1] >= 0:
                     gs = self.board[i[0]][i[1]]
-                    if t.isToken(gs):
+                    if isToken(gs):
                         if thing.isEnemy(gs):
                             nextMove.append(i)
                     else:
@@ -253,10 +253,10 @@ class game:
             for i in moves:
                 if 4 >= i[0] >= 0 and 4 >= i[1] >= 0:
                     gs = self.board[i[0]][i[1]]
-                    if t.isDiagonalMove(m1, i):
+                    if isDiagonal(m1, i):
                         if thing.isEnemy(gs):
                             nextMove.append(i)
-                    elif not t.isPlayer(gs):
+                    elif not isToken(gs):
                             nextMove.append(i)
             return nextMove
 
@@ -268,25 +268,24 @@ class game:
 
         p1 = self.board[x1][y1]
         p2 = self.board[x2][y2]
-        t = test()
+
+        enemy = -1
 
         # Check for players existence
-        # TODO Clean Up
-        if not t.isToken(p1):
+        if not isToken(p1):
+            enemy = 2
             return False
-        if t.isToken(p2):
-            if t.isEnemy(p1, p2):
+        else:
+            if isEnemy(p1, p2):
                 enemy = 1
             else:
                 enemy = 0
-        else:
-            enemy = 2
 
         # Check for player movement
         # TODO Add pawn score
         if p1.isPawn():
             # Check if move is 1 square in Straight line
-            if t.isStraight(m1, m2):
+            if isStraight(m1, m2):
                 if enemy == 2:
                     self.board[x2][y2].alive = False
                     self.board[x2][y2] = self.board[x1][y1]
@@ -294,7 +293,7 @@ class game:
                     return self
                 else:
                     return False
-            elif t.isDiagonalMove(m1, m2):
+            elif isDiagonal(m1, m2):
                 if enemy == 1:
                     self.board[x2][y2] = self.board[x1][y1]
                     self.board[x1][y1] = 0
@@ -308,13 +307,13 @@ class game:
             # Check for not moving
             if (abs(x1 - x2) <= 1) and (abs(y1 - y2) <= 1):
                 if enemy == 2:
-                    if p1.isQueen() and (abs(y1 - y2) == 1):
+                    if isQueen(p1) and (abs(y1 - y2) == 1):
                         self.queensScore += 1
                     self.board[x2][y2] = self.board[x1][y1]
                     self.board[x1][y1] = 0
                     return self
                 elif enemy == 1:
-                    if p1.isQueen() and (abs(y1 - y2) == 1):
+                    if isQueen(p1) and (abs(y1 - y2) == 1):
                         self.queensScore += 1
                     self.board[x2][y2].alive = False
                     self.board[x2][y2] = self.board[x1][y1]
@@ -338,16 +337,16 @@ class game:
             for i in range(self.y):
                 for j in range(self.x):
                     if isinstance(self.board[j][i], token):
-                        if self.board[j][i].isPawn():
+                        if isPawn(self.board[j][i]):
                             m1 = (j, i)
-                            successor = [self.makeMove(m1, k) for k in self.moveAIPlayer(m1)]
+                            successor = [self.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
         else:
             for i in range(self.y):
                 for j in range(self.x):
                     if isinstance(self.board[j][i], token):
                         if self.board[j][i].isDragon() or self.board[j][i].isQueen():
                             m1 = (j, i)
-                            successor = [self.makeMove(m1, k) for k in self.moveAIPlayer(m1)]
+                            successor = [self.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
         for k in successor:
             if k == False:
                 print('Removed False')
@@ -355,7 +354,9 @@ class game:
             if k == []:
                 print("Removed None")
                 successor.remove([])
+        print(successor)
         return successor
+
 
 def minimax(start):
 
@@ -369,6 +370,7 @@ def minimax(start):
             u = node.utility()
         else:
             vs = [do_minimax(c) for c in node.successors()]
+            print(vs)
             if node.isMaxNode():
                 u = max(vs)
             elif node.isMinNode():
@@ -380,7 +382,7 @@ def minimax(start):
         return u
 
     result = do_minimax(start)
-    # print(transpositionTable)
+    print(transpositionTable)
     return result
 
 
@@ -389,7 +391,6 @@ def minimax(start):
     # Game Play -------------------------------------
 def playGame():
     b = game()
-    b.display()
     while b.utility() != (1 or 0 or -1):
         print("Player", b.whoseTurn, "Move")
         if b.humanPlayer == b.whoseTurn:
@@ -397,5 +398,7 @@ def playGame():
         m = minimax(b)
         print(m)
 
-
-playGame()
+b = game()
+b.display()
+m = minimax(b)
+print(m)
