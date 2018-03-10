@@ -134,7 +134,7 @@ class board:
     # Find the successor nodes
     def successors(self):
         successor = []
-        nextMoves = ['0']
+        nextMoves = []
 
         player = self.whoseTurn
 
@@ -145,11 +145,11 @@ class board:
                         if self.board[j][i].isPawn():
                             m1 = (j, i)
                             nextMoves.append(self.moveAIPlayer(m1))
-                            nextMoves.remove('0')
+                            # nextMoves.remove('0')
                             for k in nextMoves[0]:
                                 newBoard = deepcopy(self)
                                 successor.append(newBoard.makeMove(m1, k))
-                            nextMoves = ['0']
+                            # nextMoves = ['0']
         else:
             for i in range(self.y):
                 for j in range(self.x):
@@ -157,11 +157,11 @@ class board:
                         if self.board[j][i].isDragon() or self.board[j][i].isQueen():
                             m1 = (j, i)
                             nextMoves.append(self.moveAIPlayer(m1))
-                            nextMoves.remove('0')
+                            # nextMoves.remove('0')
                             for k in nextMoves[0]:
                                 newBoard = deepcopy(self)
                                 successor.append(newBoard.makeMove(m1, k))
-                            nextMoves = ['0']
+                            # nextMoves = ['0']
 
         self.togglePlayer(player)
         return successor
@@ -254,6 +254,7 @@ class board:
                             nextMove.append(i)
                     else:
                         nextMove.append(i)
+            nextMove.remove('0')
             return nextMove
         elif thing.isPawn():
             for i in moves:
@@ -396,7 +397,7 @@ def minimax(start):
     transpositionTable = dict()
 
     def do_minimax(boardState, counter):
-        if counter < 10:
+        if counter < 5:
             counter += 1
             s = boardState.str()
             u = []
@@ -409,20 +410,19 @@ def minimax(start):
             else:
                 boardState.successors()
                 for c in boardState.successors():
-                    # print(c.str())
-                    vst = do_minimax(c, counter)
-                    vs.append(vst)
-                    u = c
+                    if(isinstance(c,board)):
+                        vst = do_minimax(c, counter)
+                        vs.append(vst)
+                        u = c
                 if boardState.isMaxNode():
                     m = 0
                     for c in vs:
-
+                        if isinstance(c, board):
                             if m < c.Max():
                                 m = c.Max()
                                 u = c
 
                 elif boardState.isMinNode():
-                    print('min')
                     m = 0
                     for c in vs:
                         if isinstance(c, board):
@@ -445,6 +445,7 @@ def playGame():
     if b.humanPlayer == 1:
         b.inputMove()
     m = minimax(b)
+    print(m.display())
 
 # Begin Testing Below -------------------------------
 # p = token('pawn')
@@ -496,14 +497,14 @@ def playGame():
 # b.makeMove(s4, s6)
 # b.display()
 # print(b.player1score, b.player0score)
-
-b = board()
-b.display()
-
-start = time.process_time()
-result = minimax(b)
-end = time.process_time()
-print(result.display())
+#
+# b = board()
+# b.display()
+#
+# start = time.process_time()
+# result = minimax(b)
+# end = time.process_time()
+# print(result.display())
 playGame()
 # b = board()
 # b.display()
@@ -511,4 +512,4 @@ playGame()
 # start = time.process_time()
 # result = minimax(b)
 # end = time.process_time()
-# print(result)
+# print(result.display())
