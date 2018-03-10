@@ -56,7 +56,7 @@ class board:
     draw = 0
 
     player1score = 0
-    player0score = 0
+    player2score = 0
 
     q = token('queen')
 
@@ -112,24 +112,23 @@ class board:
         return isinstance(thing, token)
 
     def isMinNode(self):
-        return self.whoseTurn == 0
+        # TODO change for ai player
+        return self.whoseTurn == 2
 
     def isMaxNode(self):
         return self.whoseTurn == 1
 
     def Max(self):
-        if self.whoseTurn == 0:
-            # TODO STANDARDIZE
-            return self.player0score
+        if self.whoseTurn == 2:
+            return self.player2score
         else:
             return self.player1score
 
     def Min(self):
-        if self.whoseTurn == 0:
-            # TODO STANDARDIZE
+        if self.whoseTurn == 2:
             return self.player1score
         else:
-            return self.player0score
+            return self.player2score
 
     # Find the successor nodes
     def successors(self):
@@ -145,11 +144,9 @@ class board:
                         if self.board[j][i].isPawn():
                             m1 = (j, i)
                             nextMoves.append(self.moveAIPlayer(m1))
-                            # nextMoves.remove('0')
                             for k in nextMoves[0]:
                                 newBoard = deepcopy(self)
                                 successor.append(newBoard.makeMove(m1, k))
-                            # nextMoves = ['0']
         else:
             for i in range(self.y):
                 for j in range(self.x):
@@ -157,11 +154,9 @@ class board:
                         if self.board[j][i].isDragon() or self.board[j][i].isQueen():
                             m1 = (j, i)
                             nextMoves.append(self.moveAIPlayer(m1))
-                            # nextMoves.remove('0')
                             for k in nextMoves[0]:
                                 newBoard = deepcopy(self)
                                 successor.append(newBoard.makeMove(m1, k))
-                            # nextMoves = ['0']
 
         self.togglePlayer(player)
         return successor
@@ -183,7 +178,7 @@ class board:
         if p == 0:
             self.whoseTurn = 1
         else:
-            self.whoseTurn = 0
+            self.whoseTurn = 2
 
     def nextAvailableMoves(self, m):
         x1 = m[0]
@@ -297,13 +292,13 @@ class board:
             if (abs(m1[0] - m2[0]) <= 1) and (abs(m1[1] - m2[1]) <= 1):
                 if enemy == 2:
                     if p1.isQueen() and (abs(m1[1] - m2[1]) == 1):
-                        self.player0score += 1
+                        self.player2score += 1
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
                     return self
                 elif enemy == 1:
                     if p1.isQueen() and (abs(m1[1] - m2[1]) == 1):
-                        self.player0score += 1
+                        self.player2score += 1
                     self.attack(p1, p2)
                     self.board[m2[0]][m2[1]] = self.board[m1[0]][m1[1]]
                     self.board[m1[0]][m1[1]] = 0
@@ -334,7 +329,7 @@ class board:
         elif attacker.isQueen() or attacker.isDragon():
             if defender.isPawn():
                 if self.isPlayer(defender):
-                    self.player0score += 1
+                    self.player2score += 1
                     defender.alive = False
                     return True
                 else:
@@ -369,7 +364,7 @@ class board:
         start = tuple(int(x.strip()) for x in input("Who do you want to move? ").split(','))
         end = tuple(int(x.strip()) for x in input("Where do you want to move them?").split(','))
 
-        self.makeMove(start,end)
+        self.makeMove(start, end)
 
 
 def minimax(start):
