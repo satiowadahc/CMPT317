@@ -418,10 +418,11 @@ def minimax(start):
 
 def playGame():
     b = board()
-    if b.humanPlayer == 1:
-        b.inputMove()
-    m = minimax(b)
-    print(m.display())
+    while b.utility(0) != 1 or b.utility(0) != 0 or b.utility(0) != -1:
+        if b.humanPlayer == b.whoseTurn:
+            b.inputMove()
+        m = minimax(b)
+        print(m.display())
 
 
 # Begin Testing --------------------------------------------------
