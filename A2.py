@@ -158,7 +158,7 @@ class board:
                                 newBoard = deepcopy(self)
                                 successor.append(newBoard.makeMove(m1, k))
 
-        self.togglePlayer(player)
+        self.togglePlayer()
         return successor
 
     def utility(self, ply):
@@ -174,8 +174,8 @@ class board:
         return ply
 
     # Used for switching player
-    def togglePlayer(self, p):
-        if p == 0:
+    def togglePlayer(self):
+        if self.whoseTurn == 2:
             self.whoseTurn = 1
         else:
             self.whoseTurn = 2
@@ -361,10 +361,21 @@ class board:
             self.humanPlayer = 1
 
     def inputMove(self):
-        start = tuple(int(x.strip()) for x in input("Who do you want to move? ").split(','))
-        end = tuple(int(x.strip()) for x in input("Where do you want to move them?").split(','))
+        legalMove = False
+        while legalMove:
+            start = tuple(int(x.strip()) for x in input("Who do you want to move? ").split(','))
+            end = tuple(int(x.strip()) for x in input("Where do you want to move them?").split(','))
 
-        self.makeMove(start, end)
+
+            legalMove = self.makeMove(start, end)
+
+            if isinstance(legalMove, board):
+                self.togglePlayer()
+                return legalMove
+
+
+
+
 
 
 def minimax(start):
@@ -415,7 +426,7 @@ def playGame():
     b = board()
     while b.utility(0) != 1 or b.utility(0) != 0 or b.utility(0) != -1:
         if b.humanPlayer == b.whoseTurn:
-            b.inputMove()
+            b = b.inputMove()
         m = minimax(b)
         print(m.display())
 
