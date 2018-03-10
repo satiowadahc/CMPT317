@@ -67,6 +67,7 @@ class game:
         self.y = 5
 
 
+
         # Token Area
         self.q = token('queen')
         self.d = [token('dragon') for c in range(3)]
@@ -84,6 +85,8 @@ class game:
         self.whoseTurn = self.wights
         self.wightsScore = 0
         self.queensScore = 0
+        self.humanPlayer = None
+        self.AIPlayer = None
 
         self.cachedWinner = False
         self.cachedWin = False

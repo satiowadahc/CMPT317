@@ -3,7 +3,7 @@
 # Chad A. Woitas and Brandon Bachynski
 import time as time
 from copy import deepcopy
-
+import math
 
 class token:
 
@@ -133,9 +133,9 @@ class board:
     # Find the successor nodes
     def successors(self):
         successor = []
-        nextMoves = []
 
         player = self.whoseTurn
+        self.togglePlayer()
 
         if player == 1:
             for i in range(self.y):
@@ -143,35 +143,45 @@ class board:
                     if isinstance(self.board[j][i], token):
                         if self.board[j][i].isPawn():
                             m1 = (j, i)
-                            nextMoves.append(self.moveAIPlayer(m1))
-                            for k in nextMoves[0]:
-                                newBoard = deepcopy(self)
-                                successor.append(newBoard.makeMove(m1, k))
+                            states = [self.makeMove(m1 , k) for k in self.moveAIPlayer(m1)]
+                            filterStates = list(filter(lambda x: x is not False , states))
+                            successor.append(deepcopy(s) for s in filterStates)
+                            # nextMoves.append(self.moveAIPlayer(m1))
+                            # for k in nextMoves[0]:
+                            #     newBoard = deepcopy(self)
+                            #     successor.append(newBoard.makeMove(m1, k))
+
+
         else:
             for i in range(self.y):
                 for j in range(self.x):
                     if isinstance(self.board[j][i], token):
                         if self.board[j][i].isDragon() or self.board[j][i].isQueen():
                             m1 = (j, i)
-                            nextMoves.append(self.moveAIPlayer(m1))
-                            for k in nextMoves[0]:
-                                newBoard = deepcopy(self)
-                                successor.append(newBoard.makeMove(m1, k))
+                            states = [self.makeMove(m1,k) for k in self.moveAIPlayer(m1)]
+                            filterStates = list(filter(lambda x: x is not False, states))
+                            successor.append(deepcopy(s) for s in filterStates)
+                            # nextMoves.append(self.moveAIPlayer(m1))
+                            # for k in nextMoves[0]:
+                            #     newBoard = deepcopy(self)
+                            #     successor.append(newBoard.makeMove(m1, k))
 
-        self.togglePlayer()
         return successor
 
-    def utility(self, ply):
-        if self.q.y == 4:
+    def isTerminal(self):
+        return  self.utility() == self.player1Win or self.player2Win
+
+    def utility(self):
+        if self.q == 4:
             return self.player1Win
 
-        if self.q.alive is False:
+        elif self.q.alive is False:
             return self.player2Win
 
-        if ply == self.maxPly:
+        else:
             return self.draw
 
-        return ply
+
 
     # Used for switching player
     def togglePlayer(self):
@@ -194,10 +204,10 @@ class board:
         elif x1 == 4 and 0 < y1 < 4:
             return {(x1, y1 - 1), (x1 - 1, y1), (x1, y1 + 1), (x1 - 1, y1 - 1), (x1 - 1, y1 + 1)}
         # 4 Can't go NegY
-        elif 0 <= x1 <= 4 and y1 == 0:
+        elif 0 < x1 < 4 and y1 == 0:
             return {(x1 - 1, y1), (x1 + 1, y1), (x1, y1 + 1), (x1 - 1, y1 + 1), (x1 + 1, y1 + 1)}
         # 5 Can't go PosY
-        elif 0 <= x1 <= 4 and y1 == 4:
+        elif 0 < x1 < 4 and y1 == 4:
             return {(x1, y1 - 1), (x1 - 1, y1), (x1 + 1, y1), (x1 - 1, y1 - 1), (x1 + 1, y1 - 1)}
         # 6 Can't go NegX or NegY
         elif x1 == 0 and y1 == 0:
@@ -355,10 +365,10 @@ class board:
         player = input("Select P1 or P2: ")
 
         if player == "P1":
-            self.humanPlayer = 0
+            self.humanPlayer = 1
 
         elif player == "P2":
-            self.humanPlayer = 1
+            self.humanPlayer = 2
 
     def inputMove(self):
         legalMove = False
@@ -374,62 +384,43 @@ class board:
                 return legalMove
 
 
-
-
-
-
 def minimax(start):
     transpositionTable = dict()
 
-    def do_minimax(boardState, counter):
-        if counter < 5:
-            counter += 1
-            s = boardState.str()
-            u = []
-            vs = []
-            if s in transpositionTable:
-                return transpositionTable[s]
-            elif boardState.utility(counter) == (-1 or 1 or 0):
-                u = boardState.utility(counter)
-            else:
-                boardState.successors()
-                for c in boardState.successors():
-                    if isinstance(c, board):
-                        vst = do_minimax(c, counter)
-                        vs.append(vst)
-                        u = c
-                if boardState.isMaxNode():
-                    m = 0
-                    for c in vs:
-                        if isinstance(c, board):
-                            if m < c.Max():
-                                m = c.Max()
-                                u = c
+    def do_minimax(node, depth, alpha, beta):
 
-                elif boardState.isMinNode():
-                    m = 0
-                    for c in vs:
-                        if isinstance(c, board):
-                            if m > c.Min():
-                                m = c.Min()
-                                u = c
-                else:
-                    print("Something went horribly wrong")
-                    return None
-            transpositionTable[s] = u
-            return u
-    result = do_minimax(start, 0)
+        s = node.str()
+        if s in transpositionTable:
+            return transpositionTable[s]
+        elif node.isTerminal():
+            u = node.utility()
+        else:
+            vs = [do_minimax(c, depth+1, alpha, beta) for c in node.successors()]
+            if node.isMaxNode():
+                u = max(vs)
+            elif node.isMinNode():
+                u = min(vs)
+            else:
+                print("Something went horribly wrong")
+                return None
+        transpositionTable[s] = u
+        return u
+    result = do_minimax(start)
+    # print(transpositionTable)
     return result
 
 
 def playGame():
     b = board()
-    while b.utility(0) != 1 or b.utility(0) != 0 or b.utility(0) != -1:
+    while  b.utility() != (1,0,-1):
+        print(b.humanPlayer)
+        print(b.whoseTurn)
         if b.humanPlayer == b.whoseTurn:
             b = b.inputMove()
         m = minimax(b)
-        print(m.display())
+
 
 
 # Begin Testing --------------------------------------------------
+print(math.inf)
 playGame()
