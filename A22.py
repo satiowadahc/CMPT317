@@ -118,9 +118,11 @@ class game:
 
         if player == "P1":
             self.humanPlayer = 1
+            self.AIPlayer = 2
 
         elif player == "P2":
             self.humanPlayer = 2
+            self.AIPlayer = 1
 
     def inputMove(self):
         legalMove = False
@@ -339,17 +341,17 @@ class game:
         if player == 1:
             for i in range(self.y):
                 for j in range(self.x):
-                    if isinstance(self.board[j][i], token):
                         if isPawn(self.board[j][i]):
                             m1 = (j, i)
-                            successor = [self.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
+                            states = [self.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
+                            successor = [game(s.getBoard()) for s in states]
         else:
             for i in range(self.y):
                 for j in range(self.x):
-                    if isinstance(self.board[j][i], token):
                         if self.board[j][i].isDragon() or self.board[j][i].isQueen():
                             m1 = (j, i)
-                            successor = [self.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
+                            states = [self.makeMove(m1,k) for k in self.nextAvailableMoves(m1)]
+                            successor = [game(s.getBoard()) for s in states]
         for k in successor:
             if k == False:
                 print('Removed False')
@@ -394,6 +396,7 @@ def minimax(start):
     # Game Play -------------------------------------
 def playGame():
     b = game()
+    b.selectPlayer()
     while b.utility() != (1 or 0 or -1):
         print("Player", b.whoseTurn, "Move")
         if b.humanPlayer == b.whoseTurn:
@@ -402,6 +405,7 @@ def playGame():
         print(m)
 
 b = game()
+b.selectPlayer()
 b.display()
 m = minimax(b)
 print(m)
