@@ -186,7 +186,7 @@ class game:
         return self.winFor()
 
     def getBoard(self):
-        return self.board()
+        return self.board
 
     #  DISPLAY FUNCTIONS -----------------------------
     def display(self):
@@ -351,7 +351,7 @@ class game:
                 for j in range(self.x):
                         if self.board[j][i].isDragon() or self.board[j][i].isQueen():
                             m1 = (j, i)
-                            states = [self.makeMove(m1,k) for k in self.nextAvailableMoves(m1)]
+                            states = [self.makeMove(m1, k) for k in self.nextAvailableMoves(m1)]
                             successor = [game(s.getBoard()) for s in states]
         for k in successor:
             if k == False:
