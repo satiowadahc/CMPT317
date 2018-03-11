@@ -348,32 +348,27 @@ class game:
         # end player movement
 
     # AI FUNCTIONS -----------------------------------
-    # TODO Current Issue Self.board is updating with g.makeMove
     def successors(self):
         successor = []
 
         player = self.whoseTurn
-        self.togglePlayer()
+        # self.togglePlayer()
         if player == 1:
             for i in range(self.y):
                 for j in range(self.x):
                     if isPawn(self.board[j][i]):
                         m1 = (j, i)
                         for k in self.nextLegalMoves(m1):
-                            g = cp.deepcopy(self)
-                            successor.append(g.makeMove(m1, k))
-                        # states = [g.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
-                        # successor = [game(s.getBoard()) for s in states]
+                            gm = cp.deepcopy(self)
+                            successor.append(gm.makeMove(m1, k))
         else:
             for i in range(self.y):
                 for j in range(self.x):
                     if isDragon(self.board[j][i]) or isQueen(self.board[j][i]):
                         m1 = (j, i)
                         for k in self.nextLegalMoves(m1):
-                            g = cp.deepcopy(self)
-                            successor.append(g.makeMove(m1, k))
-                        # states = [self.makeMove(m1, k) for k in self.nextAvailableMoves(m1)]
-                        # successor = [game(s.getBoard()) for s in states]
+                            gm = cp.deepcopy(self)
+                            successor.append(gm.makeMove(m1, k))
         for k in successor:
             if k == False:
                 print('Removed False')
@@ -422,8 +417,9 @@ def playGame():
         m = minimax(b)
         print(m)
 
-b = game()
-b.selectPlayer()
-b.display()
-m = minimax(b)
-print(m)
+
+g = game()
+g.selectPlayer()
+g.display()
+mini = minimax(g)
+print(mini)
