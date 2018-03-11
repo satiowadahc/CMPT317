@@ -1,7 +1,7 @@
 # A2
 # Chad And Brandon
 
-import copy as c
+import copy as cp
 
 # Tokens for Queens, Dragons and Pawns -------
 class token:
@@ -74,7 +74,7 @@ def isStraight(m1, m2):
 # Game State and Related functions -----------
 class game:
 
-    def __init__(self, board=[1]):
+    def __init__(self, board=1):
         self.x = 5
         self.y = 5
 
@@ -84,7 +84,7 @@ class game:
         self.p = [token('pawn') for c in range(5)]
 
         # Board area
-        if board[0] == 1:
+        if board == 1:
             self.board = [[0 for y in range(5)] for x in range(5)]
             self.board[2][0] = self.q
             self.board[1][1] = self.d[1]
@@ -193,7 +193,7 @@ class game:
         return self.winFor()
 
     def getBoard(self):
-        return c.copy(self.board)
+        return cp.copy(self.board)
 
     #  DISPLAY FUNCTIONS -----------------------------
     def display(self):
@@ -360,7 +360,7 @@ class game:
                     if isPawn(self.board[j][i]):
                         m1 = (j, i)
                         for k in self.nextLegalMoves(m1):
-                            g = game(self.getBoard())
+                            g = cp.deepcopy(self)
                             successor.append(g.makeMove(m1, k))
                         # states = [g.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
                         # successor = [game(s.getBoard()) for s in states]
@@ -369,8 +369,11 @@ class game:
                 for j in range(self.x):
                     if isDragon(self.board[j][i]) or isQueen(self.board[j][i]):
                         m1 = (j, i)
-                        states = [self.makeMove(m1, k) for k in self.nextAvailableMoves(m1)]
-                        successor = [game(s.getBoard()) for s in states]
+                        for k in self.nextLegalMoves(m1):
+                            g = cp.deepcopy(self)
+                            successor.append(g.makeMove(m1, k))
+                        # states = [self.makeMove(m1, k) for k in self.nextAvailableMoves(m1)]
+                        # successor = [game(s.getBoard()) for s in states]
         for k in successor:
             if k == False:
                 print('Removed False')
@@ -378,7 +381,6 @@ class game:
             if k == []:
                 print("Removed None")
                 successor.remove([])
-        print(successor)
         return successor
 
 
@@ -394,7 +396,6 @@ def minimax(start):
             u = node.utility()
         else:
             vs = [do_minimax(c) for c in node.successors()]
-            print(vs)
             if node.isMaxNode():
                 u = max(vs)
             elif node.isMinNode():
