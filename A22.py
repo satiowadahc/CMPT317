@@ -1,3 +1,9 @@
+# A2
+# Chad And Brandon
+
+import copy as c
+
+# Tokens for Queens, Dragons and Pawns -------
 class token:
 
     def __init__(self, thing):
@@ -65,6 +71,7 @@ def isStraight(m1, m2):
         return False
 
 
+# Game State and Related functions -----------
 class game:
 
     def __init__(self, board=[1]):
@@ -186,7 +193,7 @@ class game:
         return self.winFor()
 
     def getBoard(self):
-        return self.board
+        return c.copy(self.board)
 
     #  DISPLAY FUNCTIONS -----------------------------
     def display(self):
@@ -195,6 +202,13 @@ class game:
             for j in range(5):
                     print(self.board[j][i], end='')
             print('')
+
+    def __str__(self):
+        s = ''
+        for i in range(self.y):
+            for j in range(self.x):
+                s += str(self.board[j][i])
+        return s
 
     def str(self):
         s = ''
@@ -293,7 +307,7 @@ class game:
             # Check if move is 1 square in Straight line
             if isStraight(m1, m2):
                 if enemy == 2:
-                    self.board[x2][y2] = self.board[x1][y1]
+                    self.board[x2][y2] = p1
                     self.board[x1][y1] = 0
                     return self
                 else:
@@ -301,7 +315,7 @@ class game:
             elif isDiagonal(m1, m2):
                 if enemy == 1:
                     self.board[x2][y2].alive = False
-                    self.board[x2][y2] = self.board[x1][y1]
+                    self.board[x2][y2] = p1
                     self.board[x1][y1] = 0
                     return self
                 else:
@@ -315,14 +329,14 @@ class game:
                 if enemy == 2:
                     if isQueen(p1) and (abs(y1 - y2) == 1):
                         self.queensScore += 1
-                    self.board[x2][y2] = self.board[x1][y1]
+                    self.board[x2][y2] = p1
                     self.board[x1][y1] = 0
                     return self
                 elif enemy == 1:
                     if isQueen(p1) and (abs(y1 - y2) == 1):
                         self.queensScore += 1
                     self.board[x2][y2].alive = False
-                    self.board[x2][y2] = self.board[x1][y1]
+                    self.board[x2][y2] = p1
                     self.board[x1][y1] = 0
                     return self
                 else:
@@ -334,6 +348,7 @@ class game:
         # end player movement
 
     # AI FUNCTIONS -----------------------------------
+    # TODO Current Issue Self.board is updating with g.makeMove
     def successors(self):
         successor = []
 
@@ -342,17 +357,20 @@ class game:
         if player == 1:
             for i in range(self.y):
                 for j in range(self.x):
-                        if isPawn(self.board[j][i]):
-                            m1 = (j, i)
-                            states = [self.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
-                            successor = [game(s.getBoard()) for s in states]
+                    if isPawn(self.board[j][i]):
+                        m1 = (j, i)
+                        for k in self.nextLegalMoves(m1):
+                            g = game(self.getBoard())
+                            successor.append(g.makeMove(m1, k))
+                        # states = [g.makeMove(m1, k) for k in self.nextLegalMoves(m1)]
+                        # successor = [game(s.getBoard()) for s in states]
         else:
             for i in range(self.y):
                 for j in range(self.x):
-                        if self.board[j][i].isDragon() or self.board[j][i].isQueen():
-                            m1 = (j, i)
-                            states = [self.makeMove(m1, k) for k in self.nextAvailableMoves(m1)]
-                            successor = [game(s.getBoard()) for s in states]
+                    if isDragon(self.board[j][i]) or isQueen(self.board[j][i]):
+                        m1 = (j, i)
+                        states = [self.makeMove(m1, k) for k in self.nextAvailableMoves(m1)]
+                        successor = [game(s.getBoard()) for s in states]
         for k in successor:
             if k == False:
                 print('Removed False')
