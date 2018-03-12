@@ -3,6 +3,7 @@
 
 import copy as cp
 
+
 # Tokens for Queens, Dragons and Pawns -------
 class token:
 
@@ -74,7 +75,7 @@ def isStraight(m1, m2):
 # Game State and Related functions -----------
 class game:
 
-    def __init__(self, board=1):
+    def __init__(self, board=1, player=1):
         self.x = 5
         self.y = 5
 
@@ -102,7 +103,7 @@ class game:
         # Human and AI Player Area
         self.wights = 1
         self.queens = 2
-        self.whoseTurn = self.wights
+        self.whoseTurn = player
         self.wightsScore = 0
         self.queensScore = 0
         self.humanPlayer = None
@@ -145,8 +146,10 @@ class game:
     def togglePlayer(self):
         if self.whoseTurn == 1:
             self.whoseTurn = 2
+            return cp.deepcopy(self.whoseTurn)
         else:
             self.whoseTurn = 1
+            return cp.deepcopy(self.whoseTurn)
 
     def isMinNode(self):
         if self.whoseTurn == 2:
@@ -193,7 +196,7 @@ class game:
         return self.winFor()
 
     def getBoard(self):
-        return cp.copy(self.board)
+        return cp.deepcopy(self.board)
 
     #  DISPLAY FUNCTIONS -----------------------------
     def display(self):
@@ -273,7 +276,7 @@ class game:
                 if 4 >= i[0] >= 0 and 4 >= i[1] >= 0:
                     gs = self.board[i[0]][i[1]]
                     if isDiagonal(m1, i):
-                        if isEnemy(gs,thing):
+                        if isEnemy(gs, thing):
                             nextMove.append(i)
                     elif not isToken(gs):
                             nextMove.append(i)
@@ -359,7 +362,7 @@ class game:
                     if isPawn(self.board[j][i]):
                         m1 = (j, i)
                         for k in self.nextLegalMoves(m1):
-                            gm = cp.deepcopy(self)
+                            gm = game(self.getBoard(), self.togglePlayer())
                             successor.append(gm.makeMove(m1, k))
         else:
             for i in range(self.y):
@@ -367,7 +370,8 @@ class game:
                     if isDragon(self.board[j][i]) or isQueen(self.board[j][i]):
                         m1 = (j, i)
                         for k in self.nextLegalMoves(m1):
-                            gm = cp.deepcopy(self)
+                            gm = game(self.getBoard(), self.togglePlayer())
+                            # gm = cp.deepcopy(self)
                             successor.append(gm.makeMove(m1, k))
         for k in successor:
             if k == False:
@@ -383,28 +387,31 @@ def minimax(start):
 
     transpositionTable = dict()
 
-    def do_minimax(node):
-        s = node.str()
-        if s in transpositionTable:
-            return transpositionTable[s]
-        elif node.isTerminal():
-            u = node.utility()
-        else:
-            vs = [do_minimax(c) for c in node.successors()]
-            if node.isMaxNode():
-                u = max(vs)
-            elif node.isMinNode():
-                u = min(vs)
+    def do_minimax(node, counter):
+        if counter > 0:
+            counter -= 1
+            s = node.str()
+            if s in transpositionTable:
+                return transpositionTable[s]
+            elif node.isTerminal():
+                u = node.utility()
             else:
-                print("Something went horribly wrong")
-                return None
-        transpositionTable[s] = u
-        return u
-
-    result = do_minimax(start)
-    print(transpositionTable)
+                # for c in node.successors():
+                #     vs.append(do_minimax(c, counter))
+                vs = [do_minimax(c, counter) for c in node.successors()]
+                # print(vs)
+                if node.isMaxNode():
+                    u = max(vs)
+                elif node.isMinNode():
+                    u = min(vs)
+            print(s, u)
+            transpositionTable[s] = u
+            return u
+        else:
+            return 0
+    result = do_minimax(start, 25)
+    print(result)
     return result
-
 
 # Game Play -------------------------------------
 def playGame():
