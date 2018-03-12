@@ -186,12 +186,16 @@ class game:
                 return 0
 
     def isTerminal(self):
-        print(self.q.alive)
+        qAlive = False
         x = False
+        for i in self.board:
+            for j in i:
+                if isQueen(j):
+                    qAlive = j.alive
         for i in range(5):
             if isQueen(self.board[i][4]):
                 x = True
-        return (not self.q.alive) or x
+        return (not qAlive) or x
 
     def utility(self):
         return self.winFor()
@@ -426,24 +430,25 @@ def playGame():
         m = minimax(b)
         print(m)
 
+playGame()
 
-terminal = [[0 for y in range(5)] for x in range(5)]
-terminal[2][0] = token('queen')
-terminal[1][1] = token('dragon')
-terminal[2][1] = token('dragon')
-terminal[3][1] = token('dragon')
-terminal[0][3] = token('pawn')
-terminal[1][3] = token('pawn')
-terminal[2][3] = token('pawn')
-terminal[3][3] = token('pawn')
-terminal[4][3] = token('pawn')
-
-gs = game(terminal, 1)
-print(gs)
-print('b', gs.board[2][0].alive)
-gs.board[2][0].alive = False
-print('b', gs.board[2][0].alive)
-#TODO Kill the queen
-print('q', gs.q.alive)
-print(gs.isTerminal())
+# terminal = [[0 for y in range(5)] for x in range(5)]
+# terminal[2][0] = token('queen')
+# terminal[1][1] = token('dragon')
+# terminal[2][1] = token('dragon')
+# terminal[3][1] = token('dragon')
+# terminal[0][3] = token('pawn')
+# terminal[1][3] = token('pawn')
+# terminal[2][3] = token('pawn')
+# terminal[3][3] = token('pawn')
+# terminal[4][3] = token('pawn')
+#
+# gs = game(terminal, 1)
+# print(gs)
+# print('b', gs.board[2][0].alive)
+# gs.board[2][0].alive = False
+# print('b', gs.board[2][0].alive)
+# # TODO Kill the queen
+# print('q', gs.q.alive)
+# print(gs.isTerminal())
 
