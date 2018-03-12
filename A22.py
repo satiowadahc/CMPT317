@@ -2,7 +2,7 @@
 # Chad And Brandon
 
 import copy as cp
-
+import time as time
 
 # Tokens for Queens, Dragons and Pawns -------
 class token:
@@ -75,7 +75,7 @@ def isStraight(m1, m2):
 # Game State and Related functions -----------
 class game:
 
-    def __init__(self, board=1, player=1):
+    def __init__(self, board=[[1], [1]], player=1):
         self.x = 5
         self.y = 5
 
@@ -85,7 +85,7 @@ class game:
         self.p = [token('pawn') for c in range(5)]
 
         # Board area
-        if board == 1:
+        if board == [[1], [1]]:
             self.board = [[0 for y in range(5)] for x in range(5)]
             self.board[2][0] = self.q
             self.board[1][1] = self.d[1]
@@ -186,11 +186,12 @@ class game:
                 return 0
 
     def isTerminal(self):
+        print(self.q.alive)
         x = False
         for i in range(5):
             if isQueen(self.board[i][4]):
                 x = True
-        return not self.q.alive or x
+        return (not self.q.alive) or x
 
     def utility(self):
         return self.winFor()
@@ -396,22 +397,23 @@ def minimax(start):
             elif node.isTerminal():
                 u = node.utility()
             else:
-                # for c in node.successors():
-                #     vs.append(do_minimax(c, counter))
                 vs = [do_minimax(c, counter) for c in node.successors()]
-                # print(vs)
                 if node.isMaxNode():
                     u = max(vs)
                 elif node.isMinNode():
                     u = min(vs)
-            print(s, u)
+                else:
+                    print("something went wrong")
+                    return None
             transpositionTable[s] = u
+            print(transpositionTable[s])
             return u
         else:
             return 0
     result = do_minimax(start, 25)
     print(result)
     return result
+
 
 # Game Play -------------------------------------
 def playGame():
@@ -425,8 +427,23 @@ def playGame():
         print(m)
 
 
-g = game()
-g.selectPlayer()
-g.display()
-mini = minimax(g)
-print(mini)
+terminal = [[0 for y in range(5)] for x in range(5)]
+terminal[2][0] = token('queen')
+terminal[1][1] = token('dragon')
+terminal[2][1] = token('dragon')
+terminal[3][1] = token('dragon')
+terminal[0][3] = token('pawn')
+terminal[1][3] = token('pawn')
+terminal[2][3] = token('pawn')
+terminal[3][3] = token('pawn')
+terminal[4][3] = token('pawn')
+
+gs = game(terminal, 1)
+print(gs)
+print('b', gs.board[2][0].alive)
+gs.board[2][0].alive = False
+print('b', gs.board[2][0].alive)
+#TODO Kill the queen
+print('q', gs.q.alive)
+print(gs.isTerminal())
+
