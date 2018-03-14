@@ -480,6 +480,11 @@ def minimax(start):
                 if beta <= alpha:
                     pass
                 return bestVal
+                if len(vs) > 0:
+                    u = max(vs)
+                else:
+                    u = 0
+                    print(s, 'Illegal State in minimax maxNode')
             elif node.isMinNode():
                 #bestVal = 999
                 u = min(vs)
@@ -487,6 +492,11 @@ def minimax(start):
                 if beta <= alpha:
                     pass
                 return bestVal
+                if len(vs) > 0:
+                    u = min(vs)
+                else:
+                    u = 0
+                    print(s, 'Illegal State in minimax maxNode')
             else:
                 print("something went wrong")
                 return None
