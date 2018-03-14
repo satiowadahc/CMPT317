@@ -4,6 +4,7 @@
 import copy as cp
 import time as time
 
+
 # Tokens for Queens, Dragons and Pawns -------
 class token:
 
@@ -331,16 +332,18 @@ class game:
                     return False
             else:
                 return False
-        elif isQueen(p1) or isDragon( p1):
+        elif isQueen(p1) or isDragon(p1):
             # Check for not moving
             if (abs(x1 - x2) <= 1) and (abs(y1 - y2) <= 1):
                 if enemy == 2:
+                    # TODO is this still needed?
                     if isQueen(p1) and (abs(y1 - y2) == 1):
                         self.queensScore += 1
                     self.board[x2][y2] = p1
                     self.board[x1][y1] = 0
                     return self
                 elif enemy == 1:
+                    # TODO is this still needed?
                     if isQueen(p1) and (abs(y1 - y2) == 1):
                         self.queensScore += 1
                     self.board[x2][y2].alive = False
@@ -376,11 +379,10 @@ class game:
                         m1 = (j, i)
                         for k in self.nextLegalMoves(m1):
                             gm = game(self.getBoard(), self.togglePlayer())
-                            # gm = cp.deepcopy(self)
                             successor.append(gm.makeMove(m1, k))
         for k in successor:
             if k == False:
-                print('Removed False')
+                print('Illegal Move Reported in Succesors Function')
                 successor.remove(False)
             if k == []:
                 print("Removed None")
@@ -440,53 +442,59 @@ class Evaluations():
         return totalDistance
 
     def heuristic(self):
-        pawnsAlive,pawnPositions = self.H1()
-        dragonsAlive,dragonPositions = self.H2()
-        qAlive,qPosition = self.H3()
+        pawnsAlive, pawnPositions = self.H1()
+        dragonsAlive, dragonPositions = self.H2()
+        qAlive, qPosition = self.H3()
         distanceP2Q = self.H4()
 
-        eval_functions = [(-10,pawnsAlive),(15,dragonsAlive),(20,qAlive),(-1,distanceP2Q)]
+        eval_functions = [(-10, pawnsAlive), (15, dragonsAlive), (20, qAlive), (-1, distanceP2Q)]
 
-        return sum(x[0] + x[1] for x in eval_functions *3 )
+        return sum(x[0] + x[1] for x in eval_functions *3)
 
-
-    #Gets the manhattan distance
-    def manhattan_distance(self,p1,p2):
+    # Gets the manhattan distance
+    def manhattan_distance(self, p1, p2):
         return abs(p1[0]-p2[0]) + abs(p1[1]-p2[1])
 
 
+def minimax(start):
 
-
-
-
-def minimax(start,depth):
     transpositionTable = dict()
-    d = depth
-    def do_minimax(node,depth):
-        #if counter > 0:
 
-        s = node.str()
-        if s in transpositionTable:
-            return transpositionTable[s]
-        evaluation = Evaluations(node)
-        if node.isTerminal():
-            u = node.utility()
-        elif depth <= 0:
-            u = evaluation.heuristic()
-        else:
-            print(depth)
-            vs = [do_minimax(c,depth-1) for c in node.successors()]
-            if node.isMaxNode():
-                u = max(vs)
-            elif node.isMinNode():
-                u = min(vs)
+    def do_minimax(node, counter):
+        if counter > 0:
+            counter -= 1
+            s = node.str()
+            if s in transpositionTable:
+                return transpositionTable[s]
+            elif node.isTerminal():
+                print(s)
+                u = node.utility()
             else:
-                print("something went wrong")
-                return None
-        transpositionTable[s] = u
-        print(transpositionTable[s])
-        return u
-    result = do_minimax(start,d)
+                vs = [do_minimax(c, counter) for c in node.successors()]
+                if node.isMaxNode():
+                    if len(vs) > 0:
+                        # print(s)
+                        u = max(vs)
+                    else:
+                        print(s, 'Illegal State in minimax')
+                        u = 0
+                elif node.isMinNode():
+                    if len(vs) > 0:
+                        # print(s)
+                        u = min(vs)
+                    else:
+                        print(s, 'Illegal State in minimax')
+                        u = 0
+                else:
+                    print("something went wrong")
+                    return None
+            transpositionTable[s] = u
+            # print(transpositionTable[s])
+            return u
+        else:
+            return 0
+    result = do_minimax(start, 150)
+    print(len(transpositionTable))
     print(result)
     return result
 
@@ -495,12 +503,13 @@ def minimax(start,depth):
 def playGame():
     b = game()
     b.selectPlayer()
-    #while b.utility() != (200 or 0 or -200):
-        #print("Player", b.whoseTurn, "Move")
+    # while b.utility() != (200 or 0 or -200):
+        # print("Player", b.whoseTurn, "Move")
     if b.humanPlayer == b.whoseTurn:
         b = b.inputMove()
-    m = minimax(b,50)
+    m = minimax(b)
     print(m)
+
 
 playGame()
 
