@@ -407,7 +407,7 @@ class Evaluations():
                         positions.append((i,j))
         return numAlive, positions
 
-    # Returns the number of dragons left on the board
+    # Returns the number of dragons left on the board and a list of their positions
     def H2(self):
         numAlive = 0
         positions = list()
@@ -449,7 +449,7 @@ class Evaluations():
 
         eval_functions = [(-10, pawnsAlive), (15, dragonsAlive), (20, qAlive), (-1, distanceP2Q)]
 
-        return sum(x[0] + x[1] for x in eval_functions *3)
+        return sum(x[0] * x[1] for x in eval_functions *3 )
 
     # Gets the manhattan distance
     def manhattan_distance(self, p1, p2):
@@ -457,45 +457,34 @@ class Evaluations():
 
 
 def minimax(start):
-
     transpositionTable = dict()
 
-    def do_minimax(node, counter):
-        if counter > 0:
-            counter -= 1
-            s = node.str()
-            if s in transpositionTable:
-                return transpositionTable[s]
-            elif node.isTerminal():
-                print(s)
-                u = node.utility()
-            else:
-                vs = [do_minimax(c, counter) for c in node.successors()]
-                if node.isMaxNode():
-                    if len(vs) > 0:
-                        # print(s)
-                        u = max(vs)
-                    else:
-                        print(s, 'Illegal State in minimax')
-                        u = 0
-                elif node.isMinNode():
-                    if len(vs) > 0:
-                        # print(s)
-                        u = min(vs)
-                    else:
-                        print(s, 'Illegal State in minimax')
-                        u = 0
-                else:
-                    print("something went wrong")
-                    return None
-            transpositionTable[s] = u
-            # print(transpositionTable[s])
-            return u
+    def do_minimax(node,depth):
+        #if counter > 0:
+
+        s = node.str()
+        if s in transpositionTable:
+            return transpositionTable[s]
+        evaluation = Evaluations(node)
+        if node.isTerminal():
+            u = node.utility()
+        elif depth <= 0:
+            u = evaluation.heuristic()
         else:
-            return 0
-    result = do_minimax(start, 150)
-    print(len(transpositionTable))
-    print(result)
+            vs = [do_minimax(c,depth-1) for c in node.successors()]
+            if node.isMaxNode():
+                u = max(vs)
+            elif node.isMinNode():
+                u = min(vs)
+            else:
+                print("something went wrong")
+                return None
+        transpositionTable[s] = u
+        print(transpositionTable[s])
+        print(len(transpositionTable))
+        return u
+    result = do_minimax(start,350)
+    #print(result)
     return result
 
 
@@ -535,7 +524,9 @@ playGame()
 
 
 # g = game()
+# g.p[2].alive = False
 # e = Evaluations(g)
+#
 #
 # print(e.H1())
 # print(e.H2())
