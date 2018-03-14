@@ -449,7 +449,7 @@ class Evaluations():
 
         eval_functions = [(-10, pawnsAlive), (15, dragonsAlive), (20, qAlive), (-1, distanceP2Q)]
 
-        return sum(x[0] * x[1] for x in eval_functions *3 )
+        return sum(x[0] * x[1] for x in eval_functions * 3 )
 
     # Gets the manhattan distance
     def manhattan_distance(self, p1, p2):
@@ -459,31 +459,41 @@ class Evaluations():
 def minimax(start):
     transpositionTable = dict()
 
-    def do_minimax(node,depth):
+    def do_minimax(node,depth,alpha,beta):
         #if counter > 0:
 
         s = node.str()
         if s in transpositionTable:
             return transpositionTable[s]
         evaluation = Evaluations(node)
+
         if node.isTerminal():
             u = node.utility()
         elif depth <= 0:
             u = evaluation.heuristic()
         else:
-            vs = [do_minimax(c,depth-1) for c in node.successors()]
+            vs = [do_minimax(c,depth-1,alpha,beta) for c in node.successors()]
             if node.isMaxNode():
+                #bestVal = -999
                 u = max(vs)
+                bestVal = max(alpha,u)
+                if beta <= alpha:
+                    pass
+                return bestVal
             elif node.isMinNode():
+                #bestVal = 999
                 u = min(vs)
+                bestVal = min(beta,u)
+                if beta <= alpha:
+                    pass
+                return bestVal
             else:
                 print("something went wrong")
                 return None
         transpositionTable[s] = u
-        print(transpositionTable[s])
-        print(len(transpositionTable))
+        #print(transpositionTable[s])
         return u
-    result = do_minimax(start,350)
+    result = do_minimax(start,5,-999,999)
     #print(result)
     return result
 
