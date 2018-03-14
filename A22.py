@@ -473,9 +473,17 @@ def minimax(start):
         else:
             vs = [do_minimax(c,depth-1) for c in node.successors()]
             if node.isMaxNode():
-                u = max(vs)
+                if len(vs) > 0:
+                    u = max(vs)
+                else:
+                    u = 0
+                    print(s, 'Illegal State in minimax maxNode')
             elif node.isMinNode():
-                u = min(vs)
+                if len(vs) > 0:
+                    u = min(vs)
+                else:
+                    u = 0
+                    print(s, 'Illegal State in minimax maxNode')
             else:
                 print("something went wrong")
                 return None
