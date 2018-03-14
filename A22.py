@@ -172,7 +172,7 @@ class game:
         if self.q.alive is False:
             self.cachedWin = True
             self.cachedWinner = self.wights
-            return -1
+            return -200
         else:
             x = False
             for i in range(5):
@@ -181,7 +181,7 @@ class game:
             if x:
                 self.cachedWin = True
                 self.cachedWinner = self.queens
-                return 1
+                return 200
             else:
                 return 0
 
@@ -388,33 +388,105 @@ class game:
         return successor
 
 
-def minimax(start):
+class Evaluations():
 
+    def __init__(self,game):
+        self.game = game
+
+    # Returns the number of pawns left on the board and a list of their positions
+    def H1(self):
+        numAlive = 0
+        positions = list()
+        for i in range(len(self.game.getBoard())):
+            for j in range(len(self.game.getBoard())):
+                if isPawn(self.game.getBoard()[i][j]):
+                    if self.game.getBoard()[i][j].alive:
+                        numAlive += 1
+                        positions.append((i,j))
+        return numAlive, positions
+
+    # Returns the number of dragons left on the board
+    def H2(self):
+        numAlive = 0
+        positions = list()
+        for i in range(len(self.game.getBoard())):
+            for j in range(len(self.game.getBoard())):
+                if isDragon(self.game.getBoard()[i][j]):
+                    if self.game.getBoard()[i][j].alive:
+                        numAlive += 1
+                        positions.append((i,j))
+        return numAlive, positions
+
+    # Returns True if the Queen is still alive and her position
+    def H3(self):
+        qAlive = 1
+        position = None
+        for i in range(len(self.game.getBoard())):
+            for j in range(len(self.game.getBoard())):
+                if isQueen(self.game.getBoard()[i][j]):
+                    position = (i,j)
+                    if not self.game.getBoard()[i][j].alive:
+                        qAlive = -1
+
+        return qAlive, position
+
+    # Returns the distance of the pawns to the queen
+    def H4(self):
+        totalDistance = 0
+        numAlive,positions = self.H1()
+        qAlive,queenPosition = self.H3()
+        for i in range(len(positions)):
+            totalDistance = totalDistance + self.manhattan_distance(positions[i],queenPosition)
+        return totalDistance
+
+    def heuristic(self):
+        pawnsAlive,pawnPositions = self.H1()
+        dragonsAlive,dragonPositions = self.H2()
+        qAlive,qPosition = self.H3()
+        distanceP2Q = self.H4()
+
+        eval_functions = [(-10,pawnsAlive),(15,dragonsAlive),(20,qAlive),(-1,distanceP2Q)]
+
+        return sum(x[0] + x[1] for x in eval_functions *3 )
+
+
+    #Gets the manhattan distance
+    def manhattan_distance(self,p1,p2):
+        return abs(p1[0]-p2[0]) + abs(p1[1]-p2[1])
+
+
+
+
+
+
+def minimax(start,depth):
     transpositionTable = dict()
+    d = depth
+    def do_minimax(node,depth):
+        #if counter > 0:
 
-    def do_minimax(node, counter):
-        if counter > 0:
-            counter -= 1
-            s = node.str()
-            if s in transpositionTable:
-                return transpositionTable[s]
-            elif node.isTerminal():
-                u = node.utility()
-            else:
-                vs = [do_minimax(c, counter) for c in node.successors()]
-                if node.isMaxNode():
-                    u = max(vs)
-                elif node.isMinNode():
-                    u = min(vs)
-                else:
-                    print("something went wrong")
-                    return None
-            transpositionTable[s] = u
-            print(transpositionTable[s])
-            return u
+        s = node.str()
+        if s in transpositionTable:
+            return transpositionTable[s]
+        evaluation = Evaluations(node)
+        if node.isTerminal():
+            u = node.utility()
+        elif depth <= 0:
+            u = evaluation.heuristic()
         else:
-            return 0
-    result = do_minimax(start, 25)
+            print(depth)
+            vs = [do_minimax(c,depth-1) for c in node.successors()]
+            if node.isMaxNode():
+                u = max(vs)
+            elif node.isMinNode():
+                u = min(vs)
+            else:
+                print("something went wrong")
+                return None
+        transpositionTable[s] = u
+        print(transpositionTable[s])
+        return u
+    result = do_minimax(start,d)
     print(result)
     return result
 
@@ -423,12 +495,12 @@ def minimax(start):
 def playGame():
     b = game()
     b.selectPlayer()
-    while b.utility() != (1 or 0 or -1):
-        print("Player", b.whoseTurn, "Move")
-        if b.humanPlayer == b.whoseTurn:
-            b = b.inputMove()
-        m = minimax(b)
-        print(m)
+    #while b.utility() != (200 or 0 or -200):
+        #print("Player", b.whoseTurn, "Move")
+    if b.humanPlayer == b.whoseTurn:
+        b = b.inputMove()
+    m = minimax(b,50)
+    print(m)
 
 playGame()
 
@@ -451,4 +523,15 @@ playGame()
 # # TODO Kill the queen
 # print('q', gs.q.alive)
 # print(gs.isTerminal())
+
+
+# g = game()
+# e = Evaluations(g)
+#
+# print(e.H1())
+# print(e.H2())
+# print(e.H3())
+# print(e.H4())
+# print(e.heuristic())
+
 
