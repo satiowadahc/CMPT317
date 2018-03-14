@@ -73,6 +73,21 @@ def isStraight(m1, m2):
         return False
 
 
+def strToState(stringState):
+    lx = 0
+    mx = 5
+    xList = []
+    yList = []
+    for K in range(5):
+        for J in range(lx, mx):
+            xList += stringState[J]
+        yList.append(xList)
+        xList = []
+        lx += 5
+        mx += 5
+    return yList
+
+
 # Game State and Related functions -----------
 class game:
 
@@ -140,7 +155,7 @@ class game:
             legalMove = self.makeMove(start, end)
 
             if isinstance(legalMove, game):
-                self.togglePlayer()
+                legalMove.whoseTurn = self.togglePlayer()
                 return legalMove
 
     # GAME PLAY FUNCTIONS ------------------------------
@@ -404,7 +419,7 @@ class Evaluations():
                 if isPawn(self.game.getBoard()[i][j]):
                     if self.game.getBoard()[i][j].alive:
                         numAlive += 1
-                        positions.append((i,j))
+                        positions.append((i, j))
         return numAlive, positions
 
     # Returns the number of dragons left on the board and a list of their positions
@@ -459,51 +474,45 @@ class Evaluations():
 def minimax(start):
     transpositionTable = dict()
 
-    def do_minimax(node,depth,alpha,beta):
-        #if counter > 0:
-
+    def do_minimax(node, depth, alpha, beta):
         s = node.str()
         if s in transpositionTable:
-            return transpositionTable[s]
+            return s, transpositionTable[s]
+        # Evaluate Current Node
         evaluation = Evaluations(node)
 
         if node.isTerminal():
-            u = node.utility()
+            u = node.utility
         elif depth <= 0:
             u = evaluation.heuristic()
         else:
-            vs = [do_minimax(c,depth-1,alpha,beta) for c in node.successors()]
+            # vs now equals [boardString,Evaluations]
+            vs = [do_minimax(c, depth - 1, alpha, beta) for c in node.successors()]
+            vss, vsu = zip(*vs)
+            if len(vs) <= 0:
+                # Win for queens?
+                # TODO no more pawns
+                print('Illegal state in minimax')
+                return s, 0
             if node.isMaxNode():
-                #bestVal = -999
-                u = max(vs)
-                bestVal = max(alpha,u)
+                u = max(vsu)
+                bestVal = max(alpha, u)
                 if beta <= alpha:
                     pass
-                return bestVal
-                if len(vs) > 0:
-                    u = max(vs)
-                else:
-                    u = 0
-                    print(s, 'Illegal State in minimax maxNode')
+                return s, bestVal
             elif node.isMinNode():
-                #bestVal = 999
-                u = min(vs)
-                bestVal = min(beta,u)
+                u = min(vsu)
+                bestVal = min(beta, u)
                 if beta <= alpha:
                     pass
-                return bestVal
-                if len(vs) > 0:
-                    u = min(vs)
-                else:
-                    u = 0
-                    print(s, 'Illegal State in minimax maxNode')
+                return s, bestVal
             else:
-                print("something went wrong")
+                print('Error in minimax turns')
                 return None
         transpositionTable[s] = u
-        #print(transpositionTable[s])
-        return u
-    result = do_minimax(start,5,-999,999)
+        return s, u
+
+    result = do_minimax(start, 2, -999, 999)
     #print(result)
     return result
 
@@ -512,46 +521,14 @@ def minimax(start):
 def playGame():
     b = game()
     b.selectPlayer()
-    # while b.utility() != (200 or 0 or -200):
-        # print("Player", b.whoseTurn, "Move")
-    if b.humanPlayer == b.whoseTurn:
-        b = b.inputMove()
-    m = minimax(b)
-    print(m)
+    while b.utility() != (200 or 0 or -200):
+        print("Player", b.whoseTurn, "Move")
+        if b.humanPlayer == b.whoseTurn:
+            b = b.inputMove()
+        else:
+            # b = minimax(b)
+            result = minimax(b)
+            b = game(strToState(result[0]), b.togglePlayer())
 
 
 playGame()
-
-# terminal = [[0 for y in range(5)] for x in range(5)]
-# terminal[2][0] = token('queen')
-# terminal[1][1] = token('dragon')
-# terminal[2][1] = token('dragon')
-# terminal[3][1] = token('dragon')
-# terminal[0][3] = token('pawn')
-# terminal[1][3] = token('pawn')
-# terminal[2][3] = token('pawn')
-# terminal[3][3] = token('pawn')
-# terminal[4][3] = token('pawn')
-#
-# gs = game(terminal, 1)
-# print(gs)
-# print('b', gs.board[2][0].alive)
-# gs.board[2][0].alive = False
-# print('b', gs.board[2][0].alive)
-# # TODO Kill the queen
-# print('q', gs.q.alive)
-# print(gs.isTerminal())
-
-
-# g = game()
-# g.p[2].alive = False
-# e = Evaluations(g)
-#
-#
-# print(e.H1())
-# print(e.H2())
-# print(e.H3())
-# print(e.H4())
-# print(e.heuristic())
-
-
