@@ -565,9 +565,10 @@ def minimax(start):
                 print('Error in minimax turns')
                 return None
         transpositionTable[s] = u
+        print(s, u)
         return s, u
 
-    result = do_minimax(start, 5, -999, 999)
+    result = do_minimax(start, 75, -999, 999)
     print(len(transpositionTable))
     return result
 
@@ -591,8 +592,5 @@ def playGame():
 
 
 b = game()
-start = time.process_time()
 result = minimax(b)
-end = time.process_time()
-print(start,end)
 
