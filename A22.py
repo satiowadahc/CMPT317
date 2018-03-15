@@ -6,6 +6,9 @@ import time as time
 
 
 # Tokens for Queens, Dragons and Pawns -------
+# @Type - queen, dragon or pawn
+# @Alive - True if the token is alive
+# __str__ - Returns 'Q','D','P' for each valid type
 class token:
 
     def __init__(self, thing):
@@ -24,10 +27,14 @@ class token:
 
 
 # Useful Functions -------------------
+# @Thing - any valid object
+# Return - True if object is of class Token
 def isToken(thing):
     return isinstance(thing, token)
 
 
+# @Thing - any valid object
+# Return - True if object is of class Token with type dragon
 def isDragon(thing):
     if isToken(thing):
         return thing.type == 'dragon'
@@ -35,6 +42,8 @@ def isDragon(thing):
         return False
 
 
+# @Thing - any valid object
+# Return - True if object is of class Token with type queen
 def isQueen(thing):
     if isToken(thing):
         return thing.type == 'queen'
@@ -42,6 +51,8 @@ def isQueen(thing):
         return False
 
 
+# @Thing - any valid object
+# Return - True if object is of class Token with type pawn
 def isPawn(thing):
     if isToken(thing):
         return thing.type == 'pawn'
@@ -49,6 +60,9 @@ def isPawn(thing):
         return False
 
 
+# @Thing - any valid object
+# @Foe - any valid object
+# Return - True if two parameters are tokens of opposite teams
 def isEnemy(thing, foe):
     if isPawn(thing) and (isDragon(foe) or isQueen(foe)):
         return True
@@ -58,6 +72,9 @@ def isEnemy(thing, foe):
         return False
 
 
+# @m1 - tuple of coordinates
+# @m2 - tuple of coordinates
+# Returns True if m2 is one square diagonally in any direction of m1
 def isDiagonal(m1, m2):
     if (abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 1):
         return True
@@ -65,6 +82,9 @@ def isDiagonal(m1, m2):
         return False
 
 
+# @m1 - tuple of coordinates
+# @m2 - tuple of coordinates
+# Returns True if m2 is one square in any cartesional direction of m1
 def isStraight(m1, m2):
     if ((abs(m1[0] - m2[0]) == 1) and (abs(m1[1] - m2[1]) == 0)) or\
        ((abs(m1[0] - m2[0]) == 0) and (abs(m1[1] - m2[1]) == 1)):
@@ -73,6 +93,9 @@ def isStraight(m1, m2):
         return False
 
 
+# @stringState - string of 25 chars
+# Returns a 5x5 list of lists of stringState
+# TODO add a check for 25 chars
 def strToState(stringState):
     lx = 0
     mx = 5
@@ -122,8 +145,8 @@ class game:
         self.whoseTurn = player
         self.wightsScore = 0
         self.queensScore = 0
-        self.humanPlayer = None
-        self.AIPlayer = None
+        self.humanPlayer = 2
+        self.AIPlayer = 1
 
         self.cachedWinner = False
         self.cachedWin = False
@@ -135,6 +158,7 @@ class game:
             return self.wights
 
     # Human Input Functions ----------------------------
+    # Game initiation function. Denotes who the Human shall play
     def selectPlayer(self):
         player = input("Select P1 or P2: ")
 
@@ -146,10 +170,14 @@ class game:
             self.humanPlayer = 2
             self.AIPlayer = 1
 
+    # @input - Asks for humans token coordinate
+    # @input - Asks for a square to move them to
+    # Returns the resultant state
     def inputMove(self):
         legalMove = False
-        while legalMove:
+        while not legalMove:
             start = tuple(int(x.strip()) for x in input("Who do you want to move? ").split(','))
+            print('Thats a ', self.board[start[0]][start[1]])
             end = tuple(int(x.strip()) for x in input("Where do you want to move them?").split(','))
 
             legalMove = self.makeMove(start, end)
@@ -159,6 +187,7 @@ class game:
                 return legalMove
 
     # GAME PLAY FUNCTIONS ------------------------------
+    # @Modify - Whoseturn Alternate
     def togglePlayer(self):
         if self.whoseTurn == 1:
             self.whoseTurn = 2
@@ -167,6 +196,7 @@ class game:
             self.whoseTurn = 1
             return cp.deepcopy(self.whoseTurn)
 
+    # Return - True if Wights turn
     def isMinNode(self):
         if self.whoseTurn == 2:
             # player 1 min
@@ -175,6 +205,7 @@ class game:
             # player 2 min
             return False
 
+    # Return - True if Queens turn
     def isMaxNode(self):
         if self.whoseTurn == 1:
             # player 1 max
@@ -183,6 +214,9 @@ class game:
             # player 2 max
             return False
 
+    # Returns - Positive value for Queens win,
+    #         - Negative for Wights win
+    #         - 0 for game in progress
     def winFor(self):
         # Queen is Dead
         if self.q.alive is False:
@@ -201,6 +235,8 @@ class game:
             else:
                 return 0
 
+    # Returns - True if gamestate is either a win or draw for either player
+    # TODO - All pawns dieing is kinda an issue
     def isTerminal(self):
         qAlive = False
         x = False
@@ -213,13 +249,17 @@ class game:
                 x = True
         return (not qAlive) or x
 
+    # See winFor
     def utility(self):
         return self.winFor()
 
+    # Returns a new copy of board
     def getBoard(self):
         return cp.deepcopy(self.board)
 
     #  DISPLAY FUNCTIONS -----------------------------
+
+    # Pretty display
     def display(self):
         print('')
         for i in range(5):
@@ -227,6 +267,7 @@ class game:
                     print(self.board[j][i], end='')
             print('')
 
+    # Debugging display
     def __str__(self):
         s = ''
         for i in range(self.y):
@@ -234,6 +275,8 @@ class game:
                 s += str(self.board[j][i])
         return s
 
+    # Returns a string of current state
+    # Note - Deconversion comes from Useful functions - strToState()
     def str(self):
         s = ''
         for i in range(self.y):
@@ -242,6 +285,8 @@ class game:
         return s
 
     # MOVEMENT FUNCTIONS -----------------------------
+    # @m - Coordinate on board
+    # Return - All adjacent moves
     def nextAvailableMoves(self, m):
         x1 = m[0]
         y1 = m[1]
@@ -277,6 +322,8 @@ class game:
             print('Somethings not right')
             return {()}
 
+    # @m1 - Coordinate on board
+    # Return - All legal moves for token at M1 location
     def nextLegalMoves(self, m1):
         moves = self.nextAvailableMoves(m1)
         thing = self.board[m1[0]][m1[1]]
@@ -303,6 +350,10 @@ class game:
                             nextMove.append(i)
             return nextMove
 
+    # @m1 - coordinate on board
+    # @m2 - coordinate on board
+    # Return - New state if m1 is a token and m2 is a legal move
+    # Return - False if m1 is not a token or m2 is not a legal move
     def makeMove(self, m1, m2):
         x1 = m1[0]
         y1 = m1[1]
@@ -374,6 +425,7 @@ class game:
         # end player movement
 
     # AI FUNCTIONS -----------------------------------
+    # Return - next possible states of the board for the current player
     def successors(self):
         successor = []
 
@@ -471,6 +523,9 @@ class Evaluations():
         return abs(p1[0]-p2[0]) + abs(p1[1]-p2[1])
 
 
+# @Start - gameState
+# Return - next logical move
+# TODO - implement a better extraction from transitionTable
 def minimax(start):
     transpositionTable = dict()
 
@@ -512,23 +567,32 @@ def minimax(start):
         transpositionTable[s] = u
         return s, u
 
-    result = do_minimax(start, 2, -999, 999)
-    #print(result)
+    result = do_minimax(start, 5, -999, 999)
+    print(len(transpositionTable))
     return result
 
 
 # Game Play -------------------------------------
+# Alternate between human and AI moves
 def playGame():
     b = game()
     b.selectPlayer()
     while b.utility() != (200 or 0 or -200):
         print("Player", b.whoseTurn, "Move")
+        b.display()
         if b.humanPlayer == b.whoseTurn:
             b = b.inputMove()
         else:
             # b = minimax(b)
             result = minimax(b)
-            b = game(strToState(result[0]), b.togglePlayer())
+            b = game(strToState(result[0]), b.whoseTurn)
 
 
-playGame()
+
+
+b = game()
+start = time.process_time()
+result = minimax(b)
+end = time.process_time()
+print(start,end)
+
